@@ -43,7 +43,8 @@
 import { CanvasManager } from "./out/CanvasManager.js";
 import { Graphics } from "./out/Graphics.js";
 import { Color, colorsClass } from "./out/Colors.js";
-import { pos2 } from "./out/Functions.js";
+import { pos2, pos3 } from "./out/Functions.js";
+import { Camera } from "./out/Camera.js";
 
 const coolColor1 = new Color(200, 100, 210);
 const coolColor2 = new Color(32, 60, 13);
@@ -51,6 +52,7 @@ const coolColor2 = new Color(32, 60, 13);
 const colors = new colorsClass();
 var cm = new CanvasManager("canvas");
 var g = new Graphics(colors.black, cm);
+var cam = new Camera(pos3(0), pos3(0), 90);
 
 // Full screen
 cm.fix();
@@ -60,6 +62,7 @@ g.cm.settings.B_plane = true;
 g.cm.settings.bg_color = "black";
 g.drawBackground();
 
-g.rect(pos2(0), pos2(25), coolColor1, false, 2);
-g.circleCanvas(pos2(0), 12, coolColor1, false, 2);
-g.tri(pos2(0, 0), pos2(25), coolColor1, 2, false, 2);
+//g.rect(pos2(0), pos2(25), coolColor1, false, 2);
+//g.circleCanvas(pos2(0), 12, coolColor1, false, 2);
+//g.tri(pos2(0, 0), pos2(25), coolColor1, 2, false, 2);
+g.rectprism(pos3(0,0,0), pos3(25,25,25), cam, coolColor1, false, 2, pos3(25,25,25))

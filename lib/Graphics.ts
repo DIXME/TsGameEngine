@@ -1,9 +1,10 @@
 import { CanvasManager } from "./CanvasManager.js";
 import { Color } from "./Colors.js";
-import { Vec2 } from "./Vectors.js";
-import { pos2 } from "./Functions.js";
+import { Vec2, Vec3 } from "./Vectors.js";
+import { pos2, pos3 } from "./Functions.js";
 import { MathLib } from "./Math.js";
-import { verts2d } from "./Types.js";
+import { verts2d, verts3d, faces3d } from "./Types.js";
+import { Camera } from "./Camera.js";
 
 /**
  * i want to fix my functions so theres just one 
@@ -14,7 +15,8 @@ import { verts2d } from "./Types.js";
 export class Graphics {
     bgColor: Color;
     cm: CanvasManager;
-    // b stands for bool
+
+    // methods that do not specify 3d in there name will be 2d and not be corroloated witht a 3d scene
 
     /**
      * 🚀 notes 🚀
@@ -29,6 +31,60 @@ export class Graphics {
      *   with the canvas and my canvas manager export class
      */
 
+    rectprismVerts(pos: Vec3, whdv: Vec3): faces3d {
+        /**
+         * @param pos centered & translated cords (this is a position)
+         * @param whdv width, height & depth vector
+         */
+        var topLeftBack = pos3(pos.x - (whdv.x / 2), pos.y - (whdv.y / 2), pos.z - (whdv.z / 2))
+        var topRightBack = pos3(pos.x + (whdv.x / 2), pos.y - (whdv.y / 2), pos.z - (whdv.z / 2))
+        var bottomLeftBack = pos3(pos.x - (whdv.x / 2), pos.y + (whdv.y / 2), pos.z - (whdv.z / 2))
+        var bottomRightBack = pos3(pos.x + (whdv.x / 2), pos.y + (whdv.y / 2), pos.z - (whdv.z / 2))
+
+        var topLeftFront = pos3(pos.x - (whdv.x / 2), pos.y - (whdv.y / 2), pos.z + (whdv.z / 2))
+        var topRightFront = pos3(pos.x + (whdv.x / 2), pos.y - (whdv.y / 2), pos.z + (whdv.z / 2))
+        var bottomLeftFront = pos3(pos.x - (whdv.x / 2), pos.y + (whdv.y / 2), pos.z + (whdv.z / 2))
+        var bottomRightFront = pos3(pos.x + (whdv.x / 2), pos.y + (whdv.y / 2), pos.z + (whdv.z / 2))
+        return [
+            [
+                topLeftFront,
+                topRightFront,
+                bottomLeftFront,
+                bottomRightFront
+            ],
+            [
+                topLeftBack,
+                topRightBack,
+                bottomLeftBack,
+                bottomRightBack
+            ],
+            [
+                topLeftBack,
+                topLeftFront,
+                bottomRightFront,
+                bottomLeftBack
+            ],
+            [
+                topRightBack,
+                topRightFront,
+                bottomRightBack,
+                bottomRightFront
+            ],
+            [
+                topLeftBack,
+                topRightBack,
+                topRightFront,
+                topLeftFront
+            ],
+            [
+                bottomLeftBack,
+                bottomRightBack,
+                bottomRightFront,
+                bottomLeftFront,
+            ]
+
+        ]
+    }
 
     rectVerts(pos: Vec2, whv: Vec2): verts2d {
         /**
@@ -85,6 +141,71 @@ export class Graphics {
         if (this.cm.settings.bg_color) this.clearScreenColor(this.cm.settings.bg_color);
         if (this.cm.settings.bg_img) this // we will draw an image instead of a background color if it is turned on
         if (this.cm.settings.B_plane) this.drawPlane();
+    }
+
+    rotatePoints3d(points: verts3d, rot: Vec3): verts3d {
+        /**
+         * @param points points to rotate (verts3d)
+         * @param rot rotation vector (vec3)
+         */
+        var rotatedPoints: verts3d = points.map((point) => {
+            return point.map((p) => {
+                return MathLib.rotatePoint3(p, rot);
+            });
+        });
+
+        return rotatedPoints;
+    }
+
+    rotateFaces3d(faces: faces3d, rot: Vec3): faces3d {
+        /**
+         * @param faces faces to rotate (faces3d)
+         * @param rot rotation vector (vec3)
+         */
+        var rotatedFaces: faces3d = faces.map((face) => {
+            return face.map((point) => {
+                return MathLib.rotatePoints3(point, rot);
+            });
+        });
+        return rotatedFaces;
+    }
+
+    projectPoints3d(points: verts3d, cam: Camera): verts3d {
+        /**
+         * @param points points to project (verts3d)
+         * @param cam camera to project with (camera)
+         */
+        var projectedPoints: verts3d = points.map((point) => {
+            return point.map((p) => {
+                return MathLib.projectPoint3(p, this.cm, cam);
+            });
+        });
+        return projectedPoints;
+    }
+
+    projectFaces3d(faces: faces3d, cam: Camera): faces3d {
+        /**
+         * @param faces faces to project (faces3d)
+         * @param cam camera to project with (camera)
+         */
+        var projectedFaces: faces3d = faces.map((face) => {
+            return face.map((point) => {
+                return MathLib.projectPoint3(point, this.cm, cam);
+            });
+        }) as faces3d;
+        return projectedFaces;
+    }
+
+    faces2dToPoints2d(faces: faces3d): verts2d {
+        /**
+         * @param faces faces to convert to points (faces3d)
+         */
+        var points: verts2d = faces.map((face) => {
+            return face.map((point) => {
+                return pos2(point.x, point.y);
+            });
+        }) as unknown as verts2d;
+        return points;
     }
 
     // this export class will handle all of graphics
@@ -145,6 +266,19 @@ export class Graphics {
             this.cm.ctx.fillStyle = color.toString();
             this.cm.ctx.fillRect((pos.x - (whv.x / 2)),(pos.y - (whv.y / 2)),whv.x,whv.y);
         }
+    }
+
+    rectprism(pos: Vec3, whdv: Vec3, cam: Camera, color: Color, fill?: boolean, borderSize?: number, rot?: Vec3): void {
+        /**
+         * @arg pos centered & translated cords (this is a position)
+         * @arg whdv width, height & depth vector
+         * @arg color color string (stroke style)
+         */
+        if(!rot) rot = new Vec3(0, 0, 0);
+        var faces: faces3d = this.rectprismVerts(pos, whdv);
+        var rotatedPoints: faces3d = this.rotateFaces3d(faces, rot);
+        var projectedPoints: faces3d = this.projectFaces3d(rotatedPoints, cam);
+        this.connectPoints2(this.faces2dToPoints2d(projectedPoints), color, borderSize, fill);
     }
 
     // -------Rects------- (end)

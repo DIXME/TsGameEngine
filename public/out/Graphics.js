@@ -1,4 +1,5 @@
-import { pos2 } from "./Functions.js";
+import { Vec3 } from "./Vectors.js";
+import { pos2, pos3 } from "./Functions.js";
 import { MathLib } from "./Math.js";
 /**
  * i want to fix my functions so theres just one
@@ -6,7 +7,7 @@ import { MathLib } from "./Math.js";
  * shape that has alot of settings that are optinal
  */
 export class Graphics {
-    // b stands for bool
+    // methods that do not specify 3d in there name will be 2d and not be corroloated witht a 3d scene
     /**
      * 🚀 notes 🚀
      * - the reason some drawing methods have a canvas at the end is beacuse
@@ -19,6 +20,31 @@ export class Graphics {
      * - this is basicly just an api that allows you to interact
      *   with the canvas and my canvas manager export class
      */
+    rectprismVerts(pos, whdv) {
+        /**
+         * @param pos centered & translated cords (this is a position)
+         * @param whdv width, height & depth vector
+         */
+        var topLeftBack = pos3(pos.x - (whdv.x / 2), pos.y - (whdv.y / 2), pos.z - (whdv.z / 2));
+        var topRightBack = pos3(pos.x + (whdv.x / 2), pos.y - (whdv.y / 2), pos.z - (whdv.z / 2));
+        var bottomLeftBack = pos3(pos.x - (whdv.x / 2), pos.y + (whdv.y / 2), pos.z - (whdv.z / 2));
+        var bottomRightBack = pos3(pos.x + (whdv.x / 2), pos.y + (whdv.y / 2), pos.z - (whdv.z / 2));
+        var topLeftFront = pos3(pos.x - (whdv.x / 2), pos.y - (whdv.y / 2), pos.z + (whdv.z / 2));
+        var topRightFront = pos3(pos.x + (whdv.x / 2), pos.y - (whdv.y / 2), pos.z + (whdv.z / 2));
+        var bottomLeftFront = pos3(pos.x - (whdv.x / 2), pos.y + (whdv.y / 2), pos.z + (whdv.z / 2));
+        var bottomRightFront = pos3(pos.x + (whdv.x / 2), pos.y + (whdv.y / 2), pos.z + (whdv.z / 2));
+        return {
+            bottomLeftBack: bottomLeftBack,
+            topLeftBack: topLeftBack,
+            topRightBack: topRightBack,
+            bottomRightBack: bottomRightBack,
+            bottomLeftBackConnect: bottomLeftBack,
+            bottomLeftFront: bottomLeftFront,
+            topLeftFront: topLeftFront,
+            topRightFront: topRightFront,
+            bottomRightFront: bottomRightFront
+        };
+    }
     rectVerts(pos, whv) {
         /**
          * @param pos centered & translated cords (this is a position)
@@ -71,6 +97,26 @@ export class Graphics {
             this; // we will draw an image instead of a background color if it is turned on
         if (this.cm.settings.B_plane)
             this.drawPlane();
+    }
+    projectPoints3d(points, cam) {
+        var projectedPoints = {};
+        var names = Object.keys(points);
+        Object.values(points).forEach((point, i) => {
+            var name = names[i];
+            projectedPoints[name] = MathLib.projectPoint3(point, this.cm, cam);
+        });
+        return projectedPoints;
+    }
+    rotate3d(points, rot) {
+        var rotatedPoints = {};
+        var names = Object.keys(points);
+        Object.values(points).forEach((point, i) => {
+            var name = names[i];
+            rotatedPoints[name] = MathLib.rotate3dX(point, rot.x);
+            rotatedPoints[name] = MathLib.rotate3dY(rotatedPoints[name], rot.y);
+            rotatedPoints[name] = MathLib.rotate3dZ(rotatedPoints[name], rot.z);
+        });
+        return rotatedPoints;
     }
     // this export class will handle all of graphics
     constructor(bgColor, cm) {
@@ -129,6 +175,19 @@ export class Graphics {
             this.cm.ctx.fillStyle = color.toString();
             this.cm.ctx.fillRect((pos.x - (whv.x / 2)), (pos.y - (whv.y / 2)), whv.x, whv.y);
         }
+    }
+    rectprism(pos, whdv, cam, color, fill, borderSize, rot) {
+        /**
+         * @arg pos centered & translated cords (this is a position)
+         * @arg whdv width, height & depth vector
+         * @arg color color string (stroke style)
+         */
+        if (!rot)
+            rot = new Vec3(0, 0, 0);
+        var verts = this.rectprismVerts(pos, whdv);
+        var rotatedPoints = this.rotate3d(verts, rot);
+        var projectedPoints = this.projectPoints3d(rotatedPoints, cam);
+        this.connectPoints2(Object.values(projectedPoints), color, borderSize, fill);
     }
     // -------Rects------- (end)
     // #########################

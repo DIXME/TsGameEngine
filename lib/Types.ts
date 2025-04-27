@@ -12,5 +12,6 @@ export type canvasConfig = {
      */
 }
 
-export type verts2d = Record<string, Vec2>;
-export type verts3d = Record<string, Vec3>;
+export type verts2d = Array<Vec2> | Vec2[];
+export type verts3d = Array<Vec3> | Vec3[];
+export type faces3d = Array<verts3d> | verts3d[];
