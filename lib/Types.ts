@@ -1,3 +1,5 @@
+import { Vec2, Vec3 } from "./Vectors.js";
+
 export type canvasConfig = {
     B_plane: boolean,
     bg_color?: string,
@@ -9,3 +11,6 @@ export type canvasConfig = {
      * @arg bg_img background img (if(B_bgimage){draw})
      */
 }
+
+export type verts2d = Record<string, Vec2>;
+export type verts3d = Record<string, Vec3>;

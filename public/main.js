@@ -60,7 +60,6 @@ g.cm.settings.B_plane = true;
 g.cm.settings.bg_color = "black";
 g.drawBackground();
 
-// Draws 3 different shapes that all fit inside of each other
-g.outlineCircleCanvas(pos2(0), 20, coolColor1, 2);
-g.outlineTri(pos2(0, 0), pos2(25), coolColor1, 2);
-g.outlineRect(pos2(0), pos2(25), coolColor1, 2);
+g.rect(pos2(0), pos2(25), coolColor1, false, 2);
+g.circleCanvas(pos2(0), 12, coolColor1, false, 2);
+g.tri(pos2(0, 0), pos2(25), coolColor1, 2, false, 2);
