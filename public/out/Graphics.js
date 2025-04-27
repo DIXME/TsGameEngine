@@ -1,4 +1,4 @@
-import { Vec3 } from "./Vectors.js";
+import { Vec2 } from "./Vectors.js";
 import { pos2, pos3 } from "./Functions.js";
 import { MathLib } from "./Math.js";
 /**
@@ -25,25 +25,28 @@ export class Graphics {
          * @param pos centered & translated cords (this is a position)
          * @param whdv width, height & depth vector
          */
-        var topLeftBack = pos3(pos.x - (whdv.x / 2), pos.y - (whdv.y / 2), pos.z - (whdv.z / 2));
-        var topRightBack = pos3(pos.x + (whdv.x / 2), pos.y - (whdv.y / 2), pos.z - (whdv.z / 2));
-        var bottomLeftBack = pos3(pos.x - (whdv.x / 2), pos.y + (whdv.y / 2), pos.z - (whdv.z / 2));
-        var bottomRightBack = pos3(pos.x + (whdv.x / 2), pos.y + (whdv.y / 2), pos.z - (whdv.z / 2));
-        var topLeftFront = pos3(pos.x - (whdv.x / 2), pos.y - (whdv.y / 2), pos.z + (whdv.z / 2));
-        var topRightFront = pos3(pos.x + (whdv.x / 2), pos.y - (whdv.y / 2), pos.z + (whdv.z / 2));
-        var bottomLeftFront = pos3(pos.x - (whdv.x / 2), pos.y + (whdv.y / 2), pos.z + (whdv.z / 2));
-        var bottomRightFront = pos3(pos.x + (whdv.x / 2), pos.y + (whdv.y / 2), pos.z + (whdv.z / 2));
-        return {
-            bottomLeftBack: bottomLeftBack,
-            topLeftBack: topLeftBack,
-            topRightBack: topRightBack,
-            bottomRightBack: bottomRightBack,
-            bottomLeftBackConnect: bottomLeftBack,
-            bottomLeftFront: bottomLeftFront,
-            topLeftFront: topLeftFront,
-            topRightFront: topRightFront,
-            bottomRightFront: bottomRightFront
-        };
+        const topLeftBack = pos3(pos.x - (whdv.x / 2), pos.y - (whdv.y / 2), pos.z - (whdv.z / 2));
+        const topRightBack = pos3(pos.x + (whdv.x / 2), pos.y - (whdv.y / 2), pos.z - (whdv.z / 2));
+        const bottomLeftBack = pos3(pos.x - (whdv.x / 2), pos.y + (whdv.y / 2), pos.z - (whdv.z / 2));
+        const bottomRightBack = pos3(pos.x + (whdv.x / 2), pos.y + (whdv.y / 2), pos.z - (whdv.z / 2));
+        const topLeftFront = pos3(pos.x - (whdv.x / 2), pos.y - (whdv.y / 2), pos.z + (whdv.z / 2));
+        const topRightFront = pos3(pos.x + (whdv.x / 2), pos.y - (whdv.y / 2), pos.z + (whdv.z / 2));
+        const bottomLeftFront = pos3(pos.x - (whdv.x / 2), pos.y + (whdv.y / 2), pos.z + (whdv.z / 2));
+        const bottomRightFront = pos3(pos.x + (whdv.x / 2), pos.y + (whdv.y / 2), pos.z + (whdv.z / 2));
+        return [
+            // Front face (clockwise order)
+            [topLeftFront, topRightFront, bottomRightFront, bottomLeftFront],
+            // Back face (clockwise order)
+            [topLeftBack, bottomLeftBack, bottomRightBack, topRightBack],
+            // Left face (clockwise order)
+            [topLeftBack, topLeftFront, bottomLeftFront, bottomLeftBack],
+            // Right face (clockwise order)
+            [topRightBack, bottomRightBack, bottomRightFront, topRightFront],
+            // Top face (clockwise order)
+            [topLeftBack, topRightBack, topRightFront, topLeftFront],
+            // Bottom face (clockwise order)
+            [bottomLeftBack, bottomLeftFront, bottomRightFront, bottomRightBack],
+        ];
     }
     rectVerts(pos, whv) {
         /**
@@ -54,12 +57,12 @@ export class Graphics {
         var topRight = pos2(pos.x + (whv.x / 2), pos.y - (whv.y / 2));
         var bottomLeft = pos2(pos.x - (whv.x / 2), pos.y + (whv.y / 2));
         var bottomRight = pos2(pos.x + (whv.x / 2), pos.y + (whv.y / 2));
-        return {
-            topLeft: topLeft,
-            topRight: topRight,
-            bottomLeft: bottomLeft,
-            bottomRight: bottomRight
-        };
+        return [
+            bottomLeft,
+            topLeft,
+            topRight,
+            bottomRight
+        ];
     }
     triangleIcosVerts(pos, bhv) {
         /**
@@ -69,11 +72,11 @@ export class Graphics {
         var left = pos2(pos.x - (bhv.x / 2), pos.y + (bhv.y / 2));
         var right = pos2(pos.x + (bhv.x / 2), pos.y + (bhv.y / 2));
         var top = pos2(pos.x, pos.y - (bhv.y / 2));
-        return {
-            left: left,
-            right: right,
-            top: top
-        };
+        return [
+            left,
+            right,
+            top
+        ];
     }
     triangleVerts(pos, bhv) {
         /**
@@ -83,11 +86,11 @@ export class Graphics {
         var left = pos2(pos.x - (bhv.x / 2), pos.y + (bhv.y / 2));
         var right = pos2(pos.x + (bhv.x / 2), pos.y + (bhv.y / 2));
         var top = pos2(pos.x, pos.y - (bhv.y / 2));
-        return {
-            left: left,
-            right: right,
-            top: top
-        };
+        return [
+            left,
+            right,
+            top
+        ];
     }
     drawBackground() {
         // order matters!
@@ -98,25 +101,33 @@ export class Graphics {
         if (this.cm.settings.B_plane)
             this.drawPlane();
     }
-    projectPoints3d(points, cam) {
-        var projectedPoints = {};
-        var names = Object.keys(points);
-        Object.values(points).forEach((point, i) => {
-            var name = names[i];
-            projectedPoints[name] = MathLib.projectPoint3(point, this.cm, cam);
-        });
-        return projectedPoints;
+    verts2dToverts3d(verts, z) {
+        /**
+         * @param verts array of points (verts2d)
+         * @param z z position (number)
+         */
+        return verts.map(v => pos3(v.x, v.y, z));
     }
-    rotate3d(points, rot) {
-        var rotatedPoints = {};
-        var names = Object.keys(points);
-        Object.values(points).forEach((point, i) => {
-            var name = names[i];
-            rotatedPoints[name] = MathLib.rotate3dX(point, rot.x);
-            rotatedPoints[name] = MathLib.rotate3dY(rotatedPoints[name], rot.y);
-            rotatedPoints[name] = MathLib.rotate3dZ(rotatedPoints[name], rot.z);
+    rotateFaces(faces, rotation) {
+        return faces.map(face => face.map(point => MathLib.rotate3d(point, rotation)));
+    }
+    drawFaces(faces, cam, color, fill, borderSize) {
+        /**
+         * @param faces array of faces (array of points)
+         * @param cam camera object (Camera instance)
+         * @param color color string (stroke style)
+         * @param fill fill the shape or not (default is false)
+         * @param borderSize line width (default is 1)
+         */
+        if (!borderSize)
+            borderSize = 1;
+        faces.forEach(face => {
+            const projectedFace = face.map(p => MathLib.projectPoint3(p, cam));
+            if (!fill)
+                this.connectPoints2(projectedFace, color, borderSize);
+            if (fill)
+                this.connectPoints2(projectedFace, color, 1, true);
         });
-        return rotatedPoints;
     }
     // this export class will handle all of graphics
     constructor(bgColor, cm) {
@@ -141,21 +152,40 @@ export class Graphics {
         // this is going to be drawing a rect but with my connect points function so latter we can apply rotaion and other things
         // we would do some math here like roation
         var verts = this.rectVerts(pos, whv);
-        var topLeft = verts.topLeft;
-        var topRight = verts.topRight;
-        var bottomLeft = verts.bottomLeft;
-        var bottomRight = verts.bottomRight;
         if (rot && rot != 0) {
             // apply roation
-            topLeft = MathLib.rotatePoint2(topLeft, rot);
-            topRight = MathLib.rotatePoint2(topRight, rot);
-            bottomLeft = MathLib.rotatePoint2(bottomLeft, rot);
-            bottomRight = MathLib.rotatePoint2(bottomRight, rot);
+            verts[0] = MathLib.rotatePoint2(verts[0], rot);
+            verts[1] = MathLib.rotatePoint2(verts[1], rot);
+            verts[2] = MathLib.rotatePoint2(verts[2], rot);
+            verts[3] = MathLib.rotatePoint2(verts[3], rot);
         }
         if (!fill)
-            this.connectPoints2([topLeft, topRight, bottomRight, bottomLeft], color, borderSize);
+            this.connectPoints2(verts, color, borderSize);
         if (fill)
-            this.connectPoints2([topLeft, topRight, bottomRight, bottomLeft], color, 1, true);
+            this.connectPoints2(verts, color, 1, true);
+    }
+    rect3d(pos, whv, cam, color, fill, borderSize, rot) {
+        /**
+         * @arg pos centered & translated cords (this is a position)
+         * @arg whv width & height vector
+         * @arg color color string (stroke style)
+         */
+        // 2d rect in 3d space
+        var verts = this.rectVerts(new Vec2(pos.x, pos.y), whv);
+        var verts3d = this.verts2dToverts3d(verts, pos.z); // convert to 3d points
+        // this is just a 2d object in 3d space so we just have one face
+        // but our rotate faces and draw faces function take multiple faces so we 
+        // have to wrap it in an array
+        var faces = [
+            verts3d
+        ];
+        var projectedPoints = [];
+        if (rot) {
+            // apply roation
+            faces = this.rotateFaces([verts3d], rot);
+        }
+        // array of faces
+        this.drawFaces(faces, cam, color, fill, borderSize);
     }
     rectCanvas(pos, whv, color, fill, borderSize) {
         /**
@@ -182,12 +212,14 @@ export class Graphics {
          * @arg whdv width, height & depth vector
          * @arg color color string (stroke style)
          */
-        if (!rot)
-            rot = new Vec3(0, 0, 0);
         var verts = this.rectprismVerts(pos, whdv);
-        var rotatedPoints = this.rotate3d(verts, rot);
-        var projectedPoints = this.projectPoints3d(rotatedPoints, cam);
-        this.connectPoints2(Object.values(projectedPoints), color, borderSize, fill);
+        var projectedPoints = [];
+        if (rot) {
+            // apply roation
+            verts = this.rotateFaces(verts, rot);
+        }
+        // array of faces
+        this.drawFaces(verts, cam, color, fill, borderSize);
     }
     // -------Rects------- (end)
     // #########################
@@ -262,22 +294,20 @@ export class Graphics {
         // - we do this when drawing to center the object
         // - we do this again when calculating the points of the triangle
         // ⚠ its not a misake ⚠
-        var left = pos2(pos.x - bhv.x / 2, pos.y + bhv.y / 2);
-        var right = pos2(pos.x + bhv.x / 2, pos.y + bhv.y / 2);
-        var top = pos2(pos.x, pos.y - bhv.y / 2);
+        var verts = this.triangleVerts(pos, bhv);
         if (!rot) {
             rot = 0;
         }
         else {
             // apply roation
-            left = MathLib.rotatePoint2(left, rot);
-            right = MathLib.rotatePoint2(right, rot);
-            top = MathLib.rotatePoint2(top, rot);
+            verts[0] = MathLib.rotatePoint2(verts[0], rot);
+            verts[1] = MathLib.rotatePoint2(verts[1], rot);
+            verts[2] = MathLib.rotatePoint2(verts[2], rot);
         }
         if (fill)
-            this.connectPoints2([left, right, top], outline, borderSize, true);
+            this.connectPoints2(verts, outline, borderSize, true);
         if (!fill)
-            this.connectPoints2([left, right, top], outline, borderSize, false);
+            this.connectPoints2(verts, outline, borderSize, false);
     }
     // -------Triangles------- (end)
     // other

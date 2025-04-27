@@ -52,8 +52,6 @@ const coolColor2 = new Color(32, 60, 13);
 const colors = new colorsClass();
 var cm = new CanvasManager("canvas");
 var g = new Graphics(colors.black, cm);
-var cam = new Camera(pos3(0), pos3(0), 90);
-
 // Full screen
 cm.fix();
 
@@ -62,7 +60,39 @@ g.cm.settings.B_plane = true;
 g.cm.settings.bg_color = "black";
 g.drawBackground();
 
-//g.rect(pos2(0), pos2(25), coolColor1, false, 2);
-//g.circleCanvas(pos2(0), 12, coolColor1, false, 2);
-//g.tri(pos2(0, 0), pos2(25), coolColor1, 2, false, 2);
-g.rectprism(pos3(0,0,0), pos3(25,25,25), cam, coolColor1, false, 2, pos3(25,25,25))
+const cam = new Camera(
+    pos3(0, 0, -500),  // Camera position
+    pos3(0, 0, 0),     // Camera rotation
+    60,                // FOV
+    window.innerWidth / window.innerHeight, // Proper aspect ratio
+    0.1,               // Near plane
+    1000               // Far plane
+);
+
+// Create a 3D scene
+g.rectprism(
+    pos3(0, 0, 200),     // Front cube
+    pos3(100),
+    cam,
+    coolColor1,
+    false,
+    2
+);
+
+g.rectprism(
+    pos3(-200, 0, 400),  // Left cube
+    pos3(100),
+    cam,
+    coolColor1,
+    false,
+    2
+);
+
+g.rectprism(
+    pos3(200, 0, 400),   // Right cube
+    pos3(100),
+    cam,
+    coolColor1,
+    false,
+    2
+);
