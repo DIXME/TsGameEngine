@@ -1,0 +1,39 @@
+input[type=text] {
+    outline: none;
+    border: 1px solid  black;
+    padding: 7px;
+    border-radius: 5px;
+    overflow-wrap: break-word;
+    margin-left: 15px;
+}
+
+#debug {
+    margin: 0px;
+    margin-left: 15px;
+}
+
+#ui button {
+    outline: none;
+    border: 1px solid  black;
+    padding: 7px;
+    border-radius: 5px;
+    overflow-wrap: break-word;
+    margin: 5px;
+}
+
+#ui #drawbox input[type=text] {
+    width: 50px;
+    margin: 0px;
+}
+
+#ui #drawbox {
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+#ui {
+    background-color: rgba(255, 255, 255, 0.25);
+    padding-top: 10px;
+    padding-bottom: 10px;
+    display: flexbox;
+}

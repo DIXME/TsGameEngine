@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "outDir": "./public/out", // Output directory for compiled JavaScript files
+    "rootDir": "./lib", // Root directory for TypeScript files
+    "target": "ES6",    // Target ECMAScript version
+    "module": "ES6", // Module system
+    "strict": true,     // Enable strict type-checking
+    "esModuleInterop": true // Enable interoperability between CommonJS and ES Modules
+  },
+  "include": ["lib/**/*"], // Include all TypeScript files in the lib directory
+  "exclude": ["node_modules"] // Exclude node_modules
+}
