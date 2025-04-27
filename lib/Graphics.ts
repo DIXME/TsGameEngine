@@ -1,12 +1,22 @@
 import { CanvasManager } from "./CanvasManager.js";
 import { Color } from "./Colors.js";
-import { Vec2 } from "./Vectors.js";
-import { pos2 } from "./Functions.js";
+import { Vec2, Vec3 } from "./Vectors.js";
+import { pos2, pos3 } from "./Functions.js";
+import { MathLib } from "./Math.js";
+import { verts2d, verts3d, faces3d } from "./Types.js";
+import { Camera } from "./Camera.js";
+
+/**
+ * i want to fix my functions so theres just one 
+ * function for each
+ * shape that has alot of settings that are optinal
+ */
 
 export class Graphics {
     bgColor: Color;
     cm: CanvasManager;
-    // b stands for bool
+
+    // methods that do not specify 3d in there name will be 2d and not be corroloated witht a 3d scene
 
     /**
      * 🚀 notes 🚀
@@ -21,11 +31,127 @@ export class Graphics {
      *   with the canvas and my canvas manager export class
      */
 
+    rectprismVerts(pos: Vec3, whdv: Vec3): faces3d {
+        /**
+         * @param pos centered & translated cords (this is a position)
+         * @param whdv width, height & depth vector
+         */
+        const topLeftBack = pos3(pos.x - (whdv.x / 2), pos.y - (whdv.y / 2), pos.z - (whdv.z / 2));
+        const topRightBack = pos3(pos.x + (whdv.x / 2), pos.y - (whdv.y / 2), pos.z - (whdv.z / 2));
+        const bottomLeftBack = pos3(pos.x - (whdv.x / 2), pos.y + (whdv.y / 2), pos.z - (whdv.z / 2));
+        const bottomRightBack = pos3(pos.x + (whdv.x / 2), pos.y + (whdv.y / 2), pos.z - (whdv.z / 2));
+    
+        const topLeftFront = pos3(pos.x - (whdv.x / 2), pos.y - (whdv.y / 2), pos.z + (whdv.z / 2));
+        const topRightFront = pos3(pos.x + (whdv.x / 2), pos.y - (whdv.y / 2), pos.z + (whdv.z / 2));
+        const bottomLeftFront = pos3(pos.x - (whdv.x / 2), pos.y + (whdv.y / 2), pos.z + (whdv.z / 2));
+        const bottomRightFront = pos3(pos.x + (whdv.x / 2), pos.y + (whdv.y / 2), pos.z + (whdv.z / 2));
+    
+        return [
+            // Front face (clockwise order)
+            [topLeftFront, topRightFront, bottomRightFront, bottomLeftFront],
+    
+            // Back face (clockwise order)
+            [topLeftBack, bottomLeftBack, bottomRightBack, topRightBack],
+    
+            // Left face (clockwise order)
+            [topLeftBack, topLeftFront, bottomLeftFront, bottomLeftBack],
+    
+            // Right face (clockwise order)
+            [topRightBack, bottomRightBack, bottomRightFront, topRightFront],
+    
+            // Top face (clockwise order)
+            [topLeftBack, topRightBack, topRightFront, topLeftFront],
+    
+            // Bottom face (clockwise order)
+            [bottomLeftBack, bottomLeftFront, bottomRightFront, bottomRightBack],
+        ];
+    }
+
+    rectVerts(pos: Vec2, whv: Vec2): verts2d {
+        /**
+         * @param pos centered & translated cords (this is a position)
+         * @param whv width & height vector
+         */
+        var topLeft = pos2(pos.x - (whv.x / 2), pos.y - (whv.y / 2))
+        var topRight = pos2(pos.x + (whv.x / 2), pos.y - (whv.y / 2))
+        var bottomLeft = pos2(pos.x - (whv.x / 2), pos.y + (whv.y / 2))
+        var bottomRight = pos2(pos.x + (whv.x / 2), pos.y + (whv.y / 2))
+
+        return [
+            bottomLeft,
+            topLeft,
+            topRight,
+            bottomRight
+        ]
+    }
+
+    triangleIcosVerts(pos: Vec2, bhv: Vec2): verts2d {
+        /**
+         * @param pos centered & translated cords (this is a position)
+         * @param bhv base & height vector
+         */
+        var left = pos2(pos.x - (bhv.x / 2), pos.y + (bhv.y / 2))
+        var right = pos2(pos.x + (bhv.x / 2), pos.y + (bhv.y / 2))
+        var top = pos2(pos.x, pos.y - (bhv.y / 2))
+
+        return [
+            left,
+            right,
+            top
+        ]
+    }
+
+    triangleVerts(pos: Vec2, bhv: Vec2): verts2d {
+        /**
+         * @param pos centered & translated cords (this is a position)
+         * @param bhv base & height vector
+         */
+        var left = pos2(pos.x - (bhv.x / 2), pos.y + (bhv.y / 2))
+        var right = pos2(pos.x + (bhv.x / 2), pos.y + (bhv.y / 2))
+        var top = pos2(pos.x, pos.y - (bhv.y / 2))
+
+        return [
+            left,
+            right,
+            top
+        ]
+    }
+
     drawBackground(){
         // order matters!
         if (this.cm.settings.bg_color) this.clearScreenColor(this.cm.settings.bg_color);
         if (this.cm.settings.bg_img) this // we will draw an image instead of a background color if it is turned on
         if (this.cm.settings.B_plane) this.drawPlane();
+    }
+
+    verts2dToverts3d(verts: verts2d, z: number): verts3d {
+        /**
+         * @param verts array of points (verts2d)
+         * @param z z position (number)
+         */
+        return verts.map(v => pos3(v.x, v.y, z)) as verts3d;
+    }
+
+    private rotateFaces(faces: faces3d, rotation: Vec3): faces3d {
+        return faces.map(face => 
+            face.map(point => MathLib.rotate3d(point, rotation))
+        );
+    }
+
+    drawFaces(faces: faces3d, cam: Camera, color: Color, fill?: boolean, borderSize?: number): void {
+        /**
+         * @param faces array of faces (array of points)
+         * @param cam camera object (Camera instance)
+         * @param color color string (stroke style)
+         * @param fill fill the shape or not (default is false)
+         * @param borderSize line width (default is 1)
+         */
+        if (!borderSize) borderSize = 1;
+        faces.forEach(face => {
+            const projectedFace: Vec2[] = face.map(p => MathLib.projectPoint3(p, cam)) as Vec2[];
+            if (!fill) this.connectPoints2(projectedFace, color, borderSize);
+            if (fill) this.connectPoints2(projectedFace, color, 1, true);
+        })
     }
 
     // this export class will handle all of graphics
@@ -37,49 +163,96 @@ export class Graphics {
          */
         this.bgColor = bgColor;
         this.cm = cm;
-        }
+    }
 
-        clearScreenColor(colorC: string): void {
+    clearScreenColor(colorC: string): void {
         this.cm.ctx.fillStyle = colorC.toString();
         this.cm.ctx.fillRect(0, 0, this.cm.canvas.width, this.cm.canvas.height);
     }
 
     // -------Rects------- (start)
 
-    fillRectCanvas(pos: Vec2, whv: Vec2, color: Color): void {
+    rect(pos: Vec2, whv: Vec2, color: Color, fill?: boolean, borderSize?: number, rot?: number): void {
         /**
          * @arg pos centered & translated cords (this is a position)
          * @arg whv width & height vector
          * @arg color color string (stroke style)
          */
-        this.cm.ctx.fillStyle = color.toString();
-        pos = this.cm.translate2(pos);
-        // translate cords (topLeft => cord plane)
-        this.cm.ctx.fillRect((pos.x - (whv.x / 2)),
-        (pos.y - (whv.y / 2)),
-        whv.x,
-        whv.y);
-    }
-
-    outlineRect(pos: Vec2, whv: Vec2, color: Color, borderSize: number = 1): void {
+        // this is going to be drawing a rect but with my connect points function so latter we can apply rotaion and other things
+        // we would do some math here like roation
+        var verts: verts2d = this.rectVerts(pos, whv);
+        if (rot && rot != 0) {
+            // apply roation
+            verts[0] = MathLib.rotatePoint2(verts[0], rot);
+            verts[1] = MathLib.rotatePoint2(verts[1], rot);
+            verts[2] = MathLib.rotatePoint2(verts[2], rot);
+            verts[3] = MathLib.rotatePoint2(verts[3], rot);
+        }
+        if (!fill) this.connectPoints2(verts, color, borderSize);
+        if(fill) this.connectPoints2(verts, color, 1, true);
+    } 
+    
+    
+    rect3d(pos: Vec3, whv: Vec2, cam: Camera, color: Color, fill?: boolean, borderSize?: number, rot?: Vec3): void {
         /**
          * @arg pos centered & translated cords (this is a position)
          * @arg whv width & height vector
          * @arg color color string (stroke style)
          */
-        this.cm.ctx.strokeStyle = color.toString();
-        this.cm.ctx.lineWidth = borderSize;
-        pos = this.cm.translate2(pos);
-        // translate cords (topLeft => cord plane)
-        this.cm.ctx.strokeRect((pos.x - (whv.x / 2)),
-        (pos.y - (whv.y / 2)),
-        whv.x,
-        whv.y);
+        // 2d rect in 3d space
+        var verts: verts2d = this.rectVerts(new Vec2(pos.x, pos.y), whv);
+        var verts3d: verts3d = this.verts2dToverts3d(verts, pos.z); // convert to 3d points
+        // this is just a 2d object in 3d space so we just have one face
+        // but our rotate faces and draw faces function take multiple faces so we 
+        // have to wrap it in an array
+        var faces: faces3d = [
+            verts3d
+        ]
+        var projectedPoints: verts2d = [];
+
+        if (rot) {
+            // apply roation
+            faces = this.rotateFaces([verts3d], rot);
+        }
+
+        // array of faces
+        this.drawFaces(faces, cam, color, fill, borderSize);
     }
 
-    drawRectCanvas(pos: Vec2, whv: Vec2, fill: Color, outline: Color, borderSize: number, Bfill?: boolean, Boutline?: boolean) {
-        if (Bfill) this.outlineRect(pos, whv, outline, borderSize);
-        if (Boutline) this.fillRectCanvas(pos, whv, fill);
+    rectCanvas(pos: Vec2, whv: Vec2, color: Color, fill?: boolean, borderSize?: number): void {
+        /**
+         * @arg pos centered & translated cords (this is a position)
+         * @arg whv width & height vector
+         * @arg color color string (stroke style)
+         */
+        if(!borderSize) borderSize = 1;
+        pos = this.cm.translate2(pos);
+        if(!fill) {
+            this.cm.ctx.strokeStyle = color.toString();
+            this.cm.ctx.lineWidth = borderSize;
+            this.cm.ctx.strokeRect((pos.x - (whv.x / 2)),(pos.y - (whv.y / 2)),whv.x,whv.y);
+        } else {
+            this.cm.ctx.fillStyle = color.toString();
+            this.cm.ctx.fillRect((pos.x - (whv.x / 2)),(pos.y - (whv.y / 2)),whv.x,whv.y);
+        }
+    }
+
+    rectprism(pos: Vec3, whdv: Vec3, cam: Camera, color: Color, fill?: boolean, borderSize?: number, rot?: Vec3): void {
+        /**
+         * @arg pos centered & translated cords (this is a position)
+         * @arg whdv width, height & depth vector
+         * @arg color color string (stroke style)
+         */
+        var verts: faces3d = this.rectprismVerts(pos, whdv);
+        var projectedPoints: verts2d = [];
+
+        if (rot) {
+            // apply roation
+            verts = this.rotateFaces(verts, rot);
+        }
+
+        // array of faces
+        this.drawFaces(verts, cam, color, fill, borderSize);
     }
 
     // -------Rects------- (end)
@@ -88,60 +261,35 @@ export class Graphics {
 
     // -------Circles------- (start)
 
-    outlineCircleCanvas(pos: Vec2, r: number, color: Color, borderSize?: number): void {
+    circleCanvas(pos: Vec2, r: number, color: Color, fill?: boolean, borderSize?: number): void {
         /**
          * @param pos postion (vec2) (centred & translated)
          * @param r radius (number)
          * @param color color (Color instance)
-         * @param borderSize line width (defualt is 1)
          /*/
         pos = this.cm.translate2(pos) // topDown => cord plane
 
-        if (!borderSize) {
-        borderSize = 1
+        this.cm.ctx.moveTo(pos.x - r / 2, pos.y + r / 2); // center
+        this.cm.ctx.beginPath();
+
+        this.cm.ctx.arc(pos.x, pos.y, r, 0, 360);
+        if(fill){
+            this.cm.ctx.fillStyle = color.toString();
+            this.cm.ctx.fill();
+        } else {
+            if(!borderSize) borderSize = 2;
+            this.cm.ctx.strokeStyle = color.toString();
+            this.cm.ctx.lineWidth = borderSize;
+            this.cm.ctx.stroke();
         }
-
-        this.cm.ctx.lineWidth = borderSize
-        this.cm.ctx.strokeStyle = color.toString();
-
-        this.cm.ctx.moveTo(pos.x - r / 2, pos.y + r / 2); // center
-        this.cm.ctx.beginPath();
-
-        this.cm.ctx.arc(pos.x, pos.y, r, 0, 360);
-        this.cm.ctx.stroke();
-
         this.cm.ctx.closePath();
-    }
-
-    fillCircleCanvas(pos: Vec2, r: number, color: Color): void {
-        /**
-         * @param pos postion (vec2) (centred & translated)
-         * @param r radius (number)
-         * @param color color (Color instance)
-         /*/
-        pos = this.cm.translate2(pos) // topDown => cord plane
-
-        this.cm.ctx.fillStyle = color.toString();
-
-        this.cm.ctx.moveTo(pos.x - r / 2, pos.y + r / 2); // center
-        this.cm.ctx.beginPath();
-
-        this.cm.ctx.arc(pos.x, pos.y, r, 0, 360);
-        this.cm.ctx.fill();
-
-        this.cm.ctx.closePath();
-    }
-
-    drawCircleCanvas(pos: Vec2, r: number, fill: Color, outline: Color, borderSize: number, Bfill?: boolean, Boutline?: boolean) {
-        if (Bfill) this.outlineCircleCanvas(pos, r, outline, borderSize);
-        if (Boutline) this.fillCircleCanvas(pos, r, fill);
     }
 
     // -------Circles------- (end)
 
     // ⚠️ Impoarnt Preformce Issues Most Likely Caused By This
     // (every 3d model is just triangles and therer made with this function) ⚠️
-    connectPoints2(points: Array<Vec2>, outline: Color, lineWide?: number, fill?: boolean): void {
+    connectPoints2(points: verts2d, outline: Color, lineWide?: number, fill?: boolean): void {
         /**
          * @param origin
          * @param points
@@ -154,8 +302,8 @@ export class Graphics {
         if(!fill) this.cm.ctx.strokeStyle = outline.toString();
         if(fill) this.cm.ctx.fillStyle = outline.toString();
         points.forEach(p => {
-        p = this.cm.translate2(p);
-        this.cm.ctx.lineTo(p.x, p.y);
+            p = this.cm.translate2(p);
+            this.cm.ctx.lineTo(p.x, p.y);
         })
         var first = this.cm.translate2(points[0]);
         this.cm.ctx.lineTo(first.x, first.y); // go back to the first point to connect all points
@@ -167,7 +315,7 @@ export class Graphics {
 
     // -------Triangles------- (start)
 
-    outlineTri(pos: Vec2, bhv: Vec2, outline: Color, borderSize?: number): void {
+    tri(pos: Vec2, bhv: Vec2, outline: Color, borderSize?: number, fill?: boolean, rot?: number): void {
         /**
          * @param pos postion (vec2) (centred & translated)
          * @param bhv base & height (vec2)
@@ -177,51 +325,26 @@ export class Graphics {
         // we dont translate here beacuse the draw points method dose this for us
         // if we dont the object will be at the bottom right corner
 
-        if (!borderSize) {
-        borderSize = 1;
-        }
+        if (!borderSize) borderSize = 1;
 
         // for clarity we have to do this twice
         // - we do this when drawing to center the object
         // - we do this again when calculating the points of the triangle
         // ⚠ its not a misake ⚠
 
-        const left  = pos2(pos.x-bhv.x/2,pos.y+bhv.y/2)
-        const right = pos2(pos.x+bhv.x/2,pos.y+bhv.y/2)
-        const top   = pos2(pos.x,pos.y-bhv.y/2)
+        var verts: verts2d = this.triangleVerts(pos, bhv);
 
-        this.connectPoints2([left, right, top], outline, borderSize);
-    }
-
-    fillTri(pos: Vec2, bhv: Vec2, outline: Color, borderSize?: number): void {
-        /**
-         * @param pos postion (vec2) (centred & translated)
-         * @param bhv base & height (vec2)
-         * @param color color (Color instance)
-         * @param borderSize line width (defualt is 1)
-         /*/
-        // we dont translate here beacuse the draw points method dose this for us
-        // if we dont the object will be at the bottom right corner
-
-        if (!borderSize) {
-        borderSize = 1;
+        if (!rot) {
+            rot = 0;
+        } else {
+            // apply roation
+            verts[0] = MathLib.rotatePoint2(verts[0], rot);
+            verts[1] = MathLib.rotatePoint2(verts[1], rot);
+            verts[2] = MathLib.rotatePoint2(verts[2], rot);
         }
 
-        // for clarity we have to do this twice
-        // - we do this when drawing to center the object
-        // - we do this again when calculating the points of the triangle
-        // ⚠ its not a misake ⚠
-
-        const left = pos2(pos.x - bhv.x / 2, pos.y + bhv.y / 2)
-        const right = pos2(pos.x + bhv.x / 2, pos.y + bhv.y / 2)
-        const top = pos2(pos.x, pos.y - bhv.y / 2)
-
-        this.connectPoints2([left, right, top], outline, borderSize, true);
-    }
-
-    drawTri(pos: Vec2, bhv: Vec2, fill: Color, outline: Color, borderSize: number, Bfill?: boolean, Boutline?: boolean) {
-        if (Bfill) this.outlineTri(pos, bhv, outline, borderSize);
-        if (Boutline) this.fillTri(pos, bhv, fill);
+        if(fill) this.connectPoints2(verts, outline, borderSize, true);
+        if(!fill) this.connectPoints2(verts, outline, borderSize, false);
     }
 
     // -------Triangles------- (end)

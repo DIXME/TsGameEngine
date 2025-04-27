@@ -2,8 +2,8 @@
   "compilerOptions": {
     "outDir": "./public/out", // Output directory for compiled JavaScript files
     "rootDir": "./lib", // Root directory for TypeScript files
-    "target": "ES6",    // Target ECMAScript version
-    "module": "ES6", // Module system
+    "target": "ES2017",    // Target ECMAScript version
+    "module": "ES2020", // Module system
     "strict": true,     // Enable strict type-checking
     "esModuleInterop": true // Enable interoperability between CommonJS and ES Modules
   },

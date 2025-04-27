@@ -49,4 +49,4 @@ g.drawBackground();
 // draws 3 diffrent shapes that all fit inside of each other
 g.outlineCircleCanvas(pos2(0), 20, coolColor1, 2);
 g.outlineTri(pos2(0, 0), pos2(25), coolColor1, 2);
-g.outlineRect(pos2(0), pos2(25), coolColor1, 2);
+g.outlineRect(pos2(0), pos(25), coolColor1, 5);

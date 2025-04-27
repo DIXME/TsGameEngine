@@ -1,67 +1,44 @@
-export type KeyBind = {
-    onPress?: Function,
-    onRealease?: Function,
-    whileDown?: Function
-};
-
-/**
- * keybindexample = {
- *  'a': {
- *    onPress: () => console.log(down)
- *  }
- * }
- */
-
-
-export type KeyBinds = Record<string, KeyBind>;
-
 export class KeyboardManager {
-    keys: KeyBinds;
-
     constructor() {
         this.keys = {};
-
         // Bind methods to the correct context
         this.keyPress = this.keyPress.bind(this);
         this.keyDown = this.keyDown.bind(this);
         this.keyRealese = this.keyRealese.bind(this);
-
         // Add event listeners
         document.addEventListener('keydown', this.keyDown);
         document.addEventListener('keypress', this.keyPress);
         document.addEventListener('keyup', this.keyRealese);
     }
-
-    keyPress(e: KeyboardEvent): void {
+    keyPress(e) {
         // on key press
         console.log("Key pressed:", this.keys);
         if (this.keys[e.key]) {
             const key = this.keys[e.key];
-            if (key.onPress) key.onPress();
+            if (key.onPress)
+                key.onPress();
         }
     }
-
-    keyDown(e: KeyboardEvent): void {
+    keyDown(e) {
         // while key down
         if (this.keys[e.key]) {
             const key = this.keys[e.key];
-            if (key.whileDown) key.whileDown();
+            if (key.whileDown)
+                key.whileDown();
         }
     }
-
-    keyRealese(e: KeyboardEvent): void {
+    keyRealese(e) {
         // key release
         if (this.keys[e.key]) {
             const key = this.keys[e.key];
-            if (key.onRealease) key.onRealease();
+            if (key.onRealease)
+                key.onRealease();
         }
     }
-
-    bind(key: string, bind: KeyBind): void {
+    bind(key, bind) {
         this.keys[key] = bind;
     }
-
-    unBind(key: string): void {
+    unBind(key) {
         delete this.keys[key];
     }
 }

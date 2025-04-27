@@ -43,7 +43,12 @@
 import { CanvasManager } from "./out/CanvasManager.js";
 import { Graphics } from "./out/Graphics.js";
 import { Color, colorsClass } from "./out/Colors.js";
-import { pos2 } from "./out/Functions.js";
+import { pos2, pos3 } from "./out/Functions.js";
+import { Camera } from "./out/Camera.js";
+import { rectprism } from "./out/GameObject.js"
+import { Scene } from "./out/Scene.js";
+import { KeyboardManager } from "./out/Keyboard.js";
+import { CameraController } from "./out/CameraController.js";
 
 const coolColor1 = new Color(200, 100, 210);
 const coolColor2 = new Color(32, 60, 13);
@@ -51,7 +56,6 @@ const coolColor2 = new Color(32, 60, 13);
 const colors = new colorsClass();
 var cm = new CanvasManager("canvas");
 var g = new Graphics(colors.black, cm);
-
 // Full screen
 cm.fix();
 
@@ -60,7 +64,24 @@ g.cm.settings.B_plane = true;
 g.cm.settings.bg_color = "black";
 g.drawBackground();
 
-// Draws 3 different shapes that all fit inside of each other
-g.outlineCircleCanvas(pos2(0), 20, coolColor1, 2);
-g.outlineTri(pos2(0, 0), pos2(25), coolColor1, 2);
-g.outlineRect(pos2(0), pos2(25), coolColor1, 2);
+const cam = new Camera(
+    pos3(0, 0, -500),  // Camera position
+    pos3(0, 0, 0),     // Camera rotation
+    60,                // FOV
+    window.innerWidth / window.innerHeight, // Proper aspect ratio
+    0.1,               // Near plane
+    1000               // Far plane
+);
+
+const box = new rectprism(
+    pos3(0),     // Position
+    pos3(100), // Size (width, height, depth)
+    colors.red,        // Color
+    0.5                // Opacity
+)
+
+const scene = new Scene([],[box], cam, g);
+const keyboard = new KeyboardManager();
+const player = new CameraController(cam, keyboard);
+
+scene.loop();

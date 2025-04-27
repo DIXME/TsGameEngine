@@ -66,3 +66,18 @@ export class Vec3 {
         return new Vec3(other.x / this.x, this.y / other.y, this.z / other.z);
     }
 }
+
+export class Entity {
+    position: Vec3;
+
+    constructor(position: Vec3) {
+        this.position = position;
+    }
+
+    push(velocity: Vec3): void {
+        console.log("Before push:", this.position);
+        console.log("Velocity:", velocity);
+        this.position = this.position.add(velocity);
+        console.log("After push:", this.position);
+    }
+}
