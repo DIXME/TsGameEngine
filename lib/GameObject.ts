@@ -1,5 +1,5 @@
 import { Vec2, Vec3 } from "./Vectors.js"
-import { pos2, pos3 } from "./Functions.js"
+//import { new Vec2, new Vec3 } from "./Functions.js"
 import { Graphics } from "./Graphics.js"
 import { Camera } from "./Camera.js"
 import { Color } from "./Colors.js"
@@ -27,7 +27,7 @@ export class GameObject2d extends GameObject {
     constructor(pos: Vec2, rot: number, color: Color) {
         super();
         this.pos = pos;
-        this.vel = pos2(0);
+        this.vel = new Vec2(0);
         this.rot = rot;
         this.rotVel = 0;
         this.color = color;
@@ -43,7 +43,7 @@ export class GameObject2d extends GameObject {
 
     tick(g: Graphics): void {
         this.pos = this.pos.add(this.vel);
-        this.vel = this.vel.mul(pos3(0.99)); // friction
+        this.vel = this.vel.mul(new Vec3(0.99)); // friction
         this.rot += this.rotVel;
         this.rotVel *= 0.99; // friction
         this.draw(g);
@@ -72,6 +72,22 @@ export class GameObject2d extends GameObject {
     getColor(): Color {
         return this.color;
     }
+
+    setRot(rot: number): void {
+        this.rot = rot;
+    }
+
+    setRotVel(rotVel: number): void {
+        this.rotVel = rotVel;
+    }
+
+    getRotVel(): number {
+        return this.rotVel;
+    }
+
+    setVel(vel: Vec2): void {
+        this.vel = vel;
+    }
 }
 
 export class GameObject3d extends GameObject {
@@ -85,9 +101,9 @@ export class GameObject3d extends GameObject {
     constructor(pos: Vec3, rot: Vec3, color: Color) {
         super();
         this.pos = pos;
-        this.vel = pos3(0);
+        this.vel = new Vec3(0);
         this.rot = rot;
-        this.rotVel = pos3(0);
+        this.rotVel = new Vec3(0);
         this.color = color;
     }
 
@@ -99,14 +115,13 @@ export class GameObject3d extends GameObject {
 
     tick(g: Graphics, cam: Camera): void {
         this.pos = this.pos.add(this.vel);
-        this.vel = this.vel.mul(pos3(0.99)); // friction
+        this.vel = this.vel.mul(new Vec3(0.99)); // friction
         this.rot = this.rot.add(this.rotVel);
-        this.rotVel = this.rotVel.mul(pos3(0.99)); // friction
+        this.rotVel = this.rotVel.mul(new Vec3(0.99)); // friction
         this.draw(g, cam);
     }
 
     push(vel: Vec3): void {
-        console.log("pushing vel", vel, this.vel);
         this.vel = this.vel.add(vel);
     }
 
@@ -142,7 +157,14 @@ export class rect2d extends GameObject2d {
   }
 
   draw(g: Graphics): void {
-    g.rect(this.getPos(), this.whv, this.getColor(), false, 2, this.getRot());
+    g.rect(this.getPos(), this.whv, this.getColor(), false, 1, this.getRot());
+  }
+
+  tick(g: Graphics): void {
+    this.setPos(this.getPos().add(this.getVel()));
+    this.setVel(this.getVel().mul(new Vec2(0.99))); // friction
+    this.setRot(this.getRot() + this.getRotVel());
+    this.setRotVel(this.getRotVel() * 0.99); // friction
   }
 }
 
@@ -150,12 +172,12 @@ export class rectprism extends GameObject3d {
     private whv: Vec3;
 
     constructor(pos: Vec3, whv: Vec3, color: Color) {
-        super(pos, pos3(0), color);
+        super(pos, new Vec3(0), color);
         this.whv = whv;
     }
 
     draw(g: Graphics, cam: Camera): void {
-        g.rectprism(this.getPos(), this.whv, cam, this.getColor(), false, 2, this.getRot());
+        g.rectprism(this.getPos(), this.whv, cam, this.getColor(), false, 1, this.getRot());
     }
 }
 
@@ -172,22 +194,22 @@ export class rect3d extends GameObject {
     constructor(pos: Vec3, whv: Vec2, rot: Vec3, color: Color) {
         super();
         this.pos = pos;
-        this.vel = pos3(0);
+        this.vel = new Vec3(0);
         this.rot = rot;
-        this.rotVel = pos3(0);
+        this.rotVel = new Vec3(0);
         this.color = color;
         this.whv = whv;
     }
 
     draw(g: Graphics, cam: Camera): void {
-        g.rect3d(this.pos, this.whv, cam, this.color, false, 2, this.rot);
+        g.rect3d(this.pos, this.whv, cam, this.color, false, 1, this.rot);
     }
 
     tick(g: Graphics, cam: Camera): void {
         this.pos = this.pos.add(this.vel);
-        this.vel = this.vel.mul(pos3(0.99)); // friction
+        this.vel = this.vel.mul(new Vec3(0.99)); // friction
         this.rot = this.rot.add(this.rotVel);
-        this.rotVel = this.rotVel.mul(pos3(0.99)); // friction
+        this.rotVel = this.rotVel.mul(new Vec3(0.99)); // friction
         this.draw(g, cam);
     }
 }

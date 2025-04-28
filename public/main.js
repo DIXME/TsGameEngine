@@ -43,12 +43,12 @@
 import { CanvasManager } from "./out/CanvasManager.js";
 import { Graphics } from "./out/Graphics.js";
 import { Color, colorsClass } from "./out/Colors.js";
-import { pos2, pos3 } from "./out/Functions.js";
 import { Camera } from "./out/Camera.js";
 import { rectprism, rect3d, rect2d } from "./out/GameObject.js"
 import { Scene } from "./out/Scene.js";
 import { KeyboardManager } from "./out/Keyboard.js";
 import { CameraController } from "./out/CameraController.js";
+import { Vec2, Vec3 } from "./out/Vectors.js";
 
 const coolColor1 = new Color(200, 100, 210);
 const coolColor2 = new Color(32, 60, 13);
@@ -65,8 +65,8 @@ g.cm.settings.bg_color = "black";
 g.drawBackground();
 
 const cam = new Camera(
-    pos3(0, 0, 500),  // Camera position
-    pos3(0, 0, 0),     // Camera rotation
+    new Vec3(0, 0, 500),  // Camera position
+    new Vec3(0, 0, 0),     // Camera rotation
     50,                // FOV
     window.innerWidth / window.innerHeight, // Proper aspect ratio
     0.1,               // Near plane
@@ -74,45 +74,49 @@ const cam = new Camera(
 );
 
 const box = new rectprism(
-    pos3(0),     // Position
-    pos3(25), // Size (width, height, depth)
+    new Vec3(0),     // Position
+    new Vec3(25), // Size (width, height, depth)
     colors.red
 )
 
 const box2 = new rect3d(
-    pos3(-10),     // Position
-    pos3(25), // Size (width, height, depth)
-    pos3(35),
+    new Vec3(-10),     // Position
+    new Vec3(25), // Size (width, height, depth)
+    new Vec3(35),
     colors.red     // Opacity
 )
 
 const xAxis = new rectprism(
-    pos3(50, 0, 0),    // Position: half the length on positive X
-    pos3(100, 2, 2),   // Size: longer in X, thin in Y and Z
+    new Vec3(50, 0, 0),    // Position: half the length on positive X
+    new Vec3(100, 2, 2),   // Size: longer in X, thin in Y and Z
     colors.red
 );
 
 const yAxis = new rectprism(
-    pos3(0, 50, 0),    // Position: half the length on positive Y
-    pos3(2, 100, 2),   // Size: longer in Y, thin in X and Z
+    new Vec3(0, 50, 0),    // Position: half the length on positive Y
+    new Vec3(2, 100, 2),   // Size: longer in Y, thin in X and Z
     colors.green
 );
 
 const zAxis = new rectprism(
-    pos3(0, 0, 50),    // Position: half the length on positive Z
-    pos3(2, 2, 100),   // Size: longer in Z, thin in X and Y
+    new Vec3(0, 0, 50),    // Position: half the length on positive Z
+    new Vec3(2, 2, 100),   // Size: longer in Z, thin in X and Y
     colors.blue
 );
 
 const box2s = new rect2d(
-    pos2(0),
-    pos2(25), // Size (width, height)
+    new Vec2(0),
+    new Vec2(25), // Size (width, height)
     5,
     colors.red
 )
 
-const scene = new Scene([],[zAxis, xAxis, yAxis], cam, g);
+const scene = new Scene([],[], cam, g);
 const keyboard = new KeyboardManager();
+// fix 2d scene objects not working latter
 const player = new CameraController(cam, keyboard);
-
-scene.loop();
+scene.addObject(xAxis);
+scene.addObject(yAxis);
+scene.addObject(zAxis);
+scene.addObject(box);
+scene.loop()

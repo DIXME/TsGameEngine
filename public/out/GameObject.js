@@ -1,4 +1,4 @@
-import { pos2, pos3 } from "./Functions.js";
+import { Vec2, Vec3 } from "./Vectors.js";
 // we whant our game objects to not contain the grapics and camera classes but to be passed them
 // in thier overieded draw method
 export class GameObject {
@@ -7,7 +7,7 @@ export class GameObject2d extends GameObject {
     constructor(pos, rot, color) {
         super();
         this.pos = pos;
-        this.vel = pos2(0);
+        this.vel = new Vec2(0);
         this.rot = rot;
         this.rotVel = 0;
         this.color = color;
@@ -20,7 +20,7 @@ export class GameObject2d extends GameObject {
     }
     tick(g) {
         this.pos = this.pos.add(this.vel);
-        this.vel = this.vel.mul(pos3(0.99)); // friction
+        this.vel = this.vel.mul(new Vec3(0.99)); // friction
         this.rot += this.rotVel;
         this.rotVel *= 0.99; // friction
         this.draw(g);
@@ -43,14 +43,26 @@ export class GameObject2d extends GameObject {
     getColor() {
         return this.color;
     }
+    setRot(rot) {
+        this.rot = rot;
+    }
+    setRotVel(rotVel) {
+        this.rotVel = rotVel;
+    }
+    getRotVel() {
+        return this.rotVel;
+    }
+    setVel(vel) {
+        this.vel = vel;
+    }
 }
 export class GameObject3d extends GameObject {
     constructor(pos, rot, color) {
         super();
         this.pos = pos;
-        this.vel = pos3(0);
+        this.vel = new Vec3(0);
         this.rot = rot;
-        this.rotVel = pos3(0);
+        this.rotVel = new Vec3(0);
         this.color = color;
     }
     draw(g, cam) {
@@ -60,13 +72,12 @@ export class GameObject3d extends GameObject {
     }
     tick(g, cam) {
         this.pos = this.pos.add(this.vel);
-        this.vel = this.vel.mul(pos3(0.99)); // friction
+        this.vel = this.vel.mul(new Vec3(0.99)); // friction
         this.rot = this.rot.add(this.rotVel);
-        this.rotVel = this.rotVel.mul(pos3(0.99)); // friction
+        this.rotVel = this.rotVel.mul(new Vec3(0.99)); // friction
         this.draw(g, cam);
     }
     push(vel) {
-        console.log("pushing vel", vel, this.vel);
         this.vel = this.vel.add(vel);
     }
     setPos(pos) {
@@ -92,36 +103,42 @@ export class rect2d extends GameObject2d {
         this.whv = whv;
     }
     draw(g) {
-        g.rect(this.getPos(), this.whv, this.getColor(), false, 2, this.getRot());
+        g.rect(this.getPos(), this.whv, this.getColor(), false, 1, this.getRot());
+    }
+    tick(g) {
+        this.setPos(this.getPos().add(this.getVel()));
+        this.setVel(this.getVel().mul(new Vec2(0.99))); // friction
+        this.setRot(this.getRot() + this.getRotVel());
+        this.setRotVel(this.getRotVel() * 0.99); // friction
     }
 }
 export class rectprism extends GameObject3d {
     constructor(pos, whv, color) {
-        super(pos, pos3(0), color);
+        super(pos, new Vec3(0), color);
         this.whv = whv;
     }
     draw(g, cam) {
-        g.rectprism(this.getPos(), this.whv, cam, this.getColor(), false, 2, this.getRot());
+        g.rectprism(this.getPos(), this.whv, cam, this.getColor(), false, 1, this.getRot());
     }
 }
 export class rect3d extends GameObject {
     constructor(pos, whv, rot, color) {
         super();
         this.pos = pos;
-        this.vel = pos3(0);
+        this.vel = new Vec3(0);
         this.rot = rot;
-        this.rotVel = pos3(0);
+        this.rotVel = new Vec3(0);
         this.color = color;
         this.whv = whv;
     }
     draw(g, cam) {
-        g.rect3d(this.pos, this.whv, cam, this.color, false, 2, this.rot);
+        g.rect3d(this.pos, this.whv, cam, this.color, false, 1, this.rot);
     }
     tick(g, cam) {
         this.pos = this.pos.add(this.vel);
-        this.vel = this.vel.mul(pos3(0.99)); // friction
+        this.vel = this.vel.mul(new Vec3(0.99)); // friction
         this.rot = this.rot.add(this.rotVel);
-        this.rotVel = this.rotVel.mul(pos3(0.99)); // friction
+        this.rotVel = this.rotVel.mul(new Vec3(0.99)); // friction
         this.draw(g, cam);
     }
 }

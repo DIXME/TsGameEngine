@@ -4,7 +4,7 @@ export class Vec2 {
          * @param x x position
          * @param y y position (if undefied y=x)
          */
-        if (!y)
+        if (y == undefined)
             y = x;
         this.x = x;
         this.y = y;
@@ -29,9 +29,9 @@ export class Vec3 {
          * @param y y position (if undfined y=x)
          * @param z z position (if undfined z=x)
          */
-        if (!y)
+        if (y === undefined)
             y = x;
-        if (!z)
+        if (z === undefined)
             z = x;
         this.x = x;
         this.y = y;

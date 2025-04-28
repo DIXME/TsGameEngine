@@ -1,12 +1,12 @@
 import { GameObject } from "./GameObject.js";
-import { pos3 } from "./Functions.js";
+import { Vec3 } from "./Vectors.js";
 export class Camera extends GameObject {
     constructor(pos, rot, fov, aspect, near = 0.1, far = 1000) {
         super();
         this.pos = pos;
         this.rot = rot;
-        this.vel = pos3(0); // Initialize velocity to zero
-        this.rotVel = pos3(0); // Initialize rotation velocity to zero
+        this.vel = new Vec3(0); // Initialize velocity to zero
+        this.rotVel = new Vec3(0); // Initialize rotation velocity to zero
         this.fov = fov;
         this.aspect = aspect;
         this.near = near;
@@ -40,7 +40,7 @@ export class Camera extends GameObject {
         // Update camera position and rotation based on velocity and rotation velocity
         this.pos = this.pos.add(this.vel);
         this.rot = this.rot.add(this.rotVel);
-        this.vel = this.vel.mul(pos3(0.99)); // Apply friction to velocity
-        this.rotVel = this.rotVel.mul(pos3(0.99)); // Apply friction to rotation velocity
+        this.vel = this.vel.mul(new Vec3(0.99)); // Apply friction to velocity
+        this.rotVel = this.rotVel.mul(new Vec3(0.99)); // Apply friction to rotation velocity
     }
 }

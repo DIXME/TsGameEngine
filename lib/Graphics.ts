@@ -1,7 +1,6 @@
 import { CanvasManager } from "./CanvasManager.js";
 import { Color } from "./Colors.js";
 import { Vec2, Vec3 } from "./Vectors.js";
-import { pos2, pos3 } from "./Functions.js";
 import { MathLib } from "./Math.js";
 import { verts2d, verts3d, faces3d } from "./Types.js";
 import { Camera } from "./Camera.js";
@@ -36,15 +35,15 @@ export class Graphics {
          * @param pos centered & translated cords (this is a position)
          * @param whdv width, height & depth vector
          */
-        const topLeftBack = pos3(pos.x - (whdv.x / 2), pos.y - (whdv.y / 2), pos.z - (whdv.z / 2));
-        const topRightBack = pos3(pos.x + (whdv.x / 2), pos.y - (whdv.y / 2), pos.z - (whdv.z / 2));
-        const bottomLeftBack = pos3(pos.x - (whdv.x / 2), pos.y + (whdv.y / 2), pos.z - (whdv.z / 2));
-        const bottomRightBack = pos3(pos.x + (whdv.x / 2), pos.y + (whdv.y / 2), pos.z - (whdv.z / 2));
+        const topLeftBack = new Vec3(pos.x - (whdv.x / 2), pos.y - (whdv.y / 2), pos.z - (whdv.z / 2));
+        const topRightBack = new Vec3(pos.x + (whdv.x / 2), pos.y - (whdv.y / 2), pos.z - (whdv.z / 2));
+        const bottomLeftBack = new Vec3(pos.x - (whdv.x / 2), pos.y + (whdv.y / 2), pos.z - (whdv.z / 2));
+        const bottomRightBack = new Vec3(pos.x + (whdv.x / 2), pos.y + (whdv.y / 2), pos.z - (whdv.z / 2));
     
-        const topLeftFront = pos3(pos.x - (whdv.x / 2), pos.y - (whdv.y / 2), pos.z + (whdv.z / 2));
-        const topRightFront = pos3(pos.x + (whdv.x / 2), pos.y - (whdv.y / 2), pos.z + (whdv.z / 2));
-        const bottomLeftFront = pos3(pos.x - (whdv.x / 2), pos.y + (whdv.y / 2), pos.z + (whdv.z / 2));
-        const bottomRightFront = pos3(pos.x + (whdv.x / 2), pos.y + (whdv.y / 2), pos.z + (whdv.z / 2));
+        const topLeftFront = new Vec3(pos.x - (whdv.x / 2), pos.y - (whdv.y / 2), pos.z + (whdv.z / 2));
+        const topRightFront = new Vec3(pos.x + (whdv.x / 2), pos.y - (whdv.y / 2), pos.z + (whdv.z / 2));
+        const bottomLeftFront = new Vec3(pos.x - (whdv.x / 2), pos.y + (whdv.y / 2), pos.z + (whdv.z / 2));
+        const bottomRightFront = new Vec3(pos.x + (whdv.x / 2), pos.y + (whdv.y / 2), pos.z + (whdv.z / 2));
     
         return [
             // Front face (clockwise order)
@@ -67,10 +66,10 @@ export class Graphics {
          * @param pos centered & translated cords (this is a position)
          * @param whv width & height vector
          */
-        var topLeft = pos2(pos.x - (whv.x / 2), pos.y - (whv.y / 2))
-        var topRight = pos2(pos.x + (whv.x / 2), pos.y - (whv.y / 2))
-        var bottomLeft = pos2(pos.x - (whv.x / 2), pos.y + (whv.y / 2))
-        var bottomRight = pos2(pos.x + (whv.x / 2), pos.y + (whv.y / 2))
+        var topLeft = new Vec2(pos.x - (whv.x / 2), pos.y - (whv.y / 2))
+        var topRight = new Vec2(pos.x + (whv.x / 2), pos.y - (whv.y / 2))
+        var bottomLeft = new Vec2(pos.x - (whv.x / 2), pos.y + (whv.y / 2))
+        var bottomRight = new Vec2(pos.x + (whv.x / 2), pos.y + (whv.y / 2))
 
         return [
             bottomLeft,
@@ -85,9 +84,9 @@ export class Graphics {
          * @param pos centered & translated cords (this is a position)
          * @param bhv base & height vector
          */
-        var left = pos2(pos.x - (bhv.x / 2), pos.y + (bhv.y / 2))
-        var right = pos2(pos.x + (bhv.x / 2), pos.y + (bhv.y / 2))
-        var top = pos2(pos.x, pos.y - (bhv.y / 2))
+        var left = new Vec2(pos.x - (bhv.x / 2), pos.y + (bhv.y / 2))
+        var right = new Vec2(pos.x + (bhv.x / 2), pos.y + (bhv.y / 2))
+        var top = new Vec2(pos.x, pos.y - (bhv.y / 2))
 
         return [
             left,
@@ -101,9 +100,9 @@ export class Graphics {
          * @param pos centered & translated cords (this is a position)
          * @param bhv base & height vector
          */
-        var left = pos2(pos.x - (bhv.x / 2), pos.y + (bhv.y / 2))
-        var right = pos2(pos.x + (bhv.x / 2), pos.y + (bhv.y / 2))
-        var top = pos2(pos.x, pos.y - (bhv.y / 2))
+        var left = new Vec2(pos.x - (bhv.x / 2), pos.y + (bhv.y / 2))
+        var right = new Vec2(pos.x + (bhv.x / 2), pos.y + (bhv.y / 2))
+        var top = new Vec2(pos.x, pos.y - (bhv.y / 2))
 
         return [
             left,
@@ -124,7 +123,7 @@ export class Graphics {
          * @param verts array of points (verts2d)
          * @param z z position (number)
          */
-        return verts.map(v => pos3(v.x, v.y, z)) as verts3d;
+        return verts.map(v => new Vec3(v.x, v.y, z)) as verts3d;
     }
 
     private rotateFaces(faces: faces3d, rotation: Vec3): faces3d {
@@ -215,20 +214,15 @@ export class Graphics {
     }
 
     rectCanvas(pos: Vec2, whv: Vec2, color: Color, fill?: boolean, borderSize?: number): void {
-        /**
-         * @arg pos centered & translated cords (this is a position)
-         * @arg whv width & height vector
-         * @arg color color string (stroke style)
-         */
-        if(!borderSize) borderSize = 1;
+        if (!borderSize) borderSize = 1;
         pos = this.cm.translate2(pos);
-        if(!fill) {
+        if (!fill) {
             this.cm.ctx.strokeStyle = color.toString();
             this.cm.ctx.lineWidth = borderSize;
-            this.cm.ctx.strokeRect((pos.x - (whv.x / 2)),(pos.y - (whv.y / 2)),whv.x,whv.y);
+            this.cm.ctx.strokeRect(pos.x - whv.x / 2, pos.y - whv.y / 2, whv.x, whv.y);
         } else {
             this.cm.ctx.fillStyle = color.toString();
-            this.cm.ctx.fillRect((pos.x - (whv.x / 2)),(pos.y - (whv.y / 2)),whv.x,whv.y);
+            this.cm.ctx.fillRect(pos.x - whv.x / 2, pos.y - whv.y / 2, whv.x, whv.y);
         }
     }
 
