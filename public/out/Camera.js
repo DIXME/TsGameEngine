@@ -32,6 +32,10 @@ export class Camera extends GameObject {
         // Get the camera's position
         return this.pos;
     }
+    getRot() {
+        // Get the camera's rotation
+        return this.rot;
+    }
     tick() {
         // Update camera position and rotation based on velocity and rotation velocity
         this.pos = this.pos.add(this.vel);

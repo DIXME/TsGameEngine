@@ -74,9 +74,18 @@ export class CanvasManager {
         document.body.appendChild(style);
     }
 
-    public translate2(pos: Vec2): Vec2 {
-        // we flip the y axis so it is like a normal graph (0,0) is in the middle of the canvas 
-        // topLeft => cordinate plane
-        return new Vec2(pos.x + (this.canvas.width / 2),0-pos.y + (this.canvas.height / 2))
+    translate2(pos: Vec2): Vec2 {
+        return new Vec2(
+            pos.x + this.canvas.width / 2,
+            -pos.y + this.canvas.height / 2  // Invert Y to make positive Y go up
+        );
+    }
+
+    // Add this helper method for inverse translation
+    untranslate2(pos: Vec2): Vec2 {
+        return new Vec2(
+            pos.x - this.canvas.width / 2,
+            -(pos.y - this.canvas.height / 2)
+        );
     }
 }

@@ -265,10 +265,8 @@ export class Graphics {
             this.cm.ctx.strokeStyle = outline.toString();
         if (fill)
             this.cm.ctx.fillStyle = outline.toString();
-        points.forEach(p => {
-            p = this.cm.translate2(p);
-            this.cm.ctx.lineTo(p.x, p.y);
-        });
+        const translatedPoints = points.map(p => this.cm.translate2(p));
+        translatedPoints.forEach(p => this.cm.ctx.lineTo(p.x, p.y));
         var first = this.cm.translate2(points[0]);
         this.cm.ctx.lineTo(first.x, first.y); // go back to the first point to connect all points
         // otherwise it would be open and not be a polygon

@@ -31,7 +31,3 @@ export class CameraController {
         this.keyboard.bind("l", { whileDown: () => this.camera.pushRot(pos3(0, -this.speed, 0)) } as KeyBind);
     }
 }
-
-push(velocity: Vec3): void {
-    this.position = this.position.add(velocity);
-}

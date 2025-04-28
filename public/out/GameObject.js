@@ -66,6 +66,7 @@ export class GameObject3d extends GameObject {
         this.draw(g, cam);
     }
     push(vel) {
+        console.log("pushing vel", vel, this.vel);
         this.vel = this.vel.add(vel);
     }
     setPos(pos) {
@@ -101,5 +102,26 @@ export class rectprism extends GameObject3d {
     }
     draw(g, cam) {
         g.rectprism(this.getPos(), this.whv, cam, this.getColor(), false, 2, this.getRot());
+    }
+}
+export class rect3d extends GameObject {
+    constructor(pos, whv, rot, color) {
+        super();
+        this.pos = pos;
+        this.vel = pos3(0);
+        this.rot = rot;
+        this.rotVel = pos3(0);
+        this.color = color;
+        this.whv = whv;
+    }
+    draw(g, cam) {
+        g.rect3d(this.pos, this.whv, cam, this.color, false, 2, this.rot);
+    }
+    tick(g, cam) {
+        this.pos = this.pos.add(this.vel);
+        this.vel = this.vel.mul(pos3(0.99)); // friction
+        this.rot = this.rot.add(this.rotVel);
+        this.rotVel = this.rotVel.mul(pos3(0.99)); // friction
+        this.draw(g, cam);
     }
 }

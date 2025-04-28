@@ -106,6 +106,7 @@ export class GameObject3d extends GameObject {
     }
 
     push(vel: Vec3): void {
+        console.log("pushing vel", vel, this.vel);
         this.vel = this.vel.add(vel);
     }
 
@@ -155,5 +156,38 @@ export class rectprism extends GameObject3d {
 
     draw(g: Graphics, cam: Camera): void {
         g.rectprism(this.getPos(), this.whv, cam, this.getColor(), false, 2, this.getRot());
+    }
+}
+
+export class rect3d extends GameObject {
+    // this is a 2d rect in 3d space
+    // it is a sub class of gameobject beacuse it is 3d nor 2d
+    private pos: Vec3;
+    private vel: Vec3;
+    private rot: Vec3;
+    private rotVel: Vec3;
+    private color: Color;
+    private whv: Vec2; // width height and depth vector
+
+    constructor(pos: Vec3, whv: Vec2, rot: Vec3, color: Color) {
+        super();
+        this.pos = pos;
+        this.vel = pos3(0);
+        this.rot = rot;
+        this.rotVel = pos3(0);
+        this.color = color;
+        this.whv = whv;
+    }
+
+    draw(g: Graphics, cam: Camera): void {
+        g.rect3d(this.pos, this.whv, cam, this.color, false, 2, this.rot);
+    }
+
+    tick(g: Graphics, cam: Camera): void {
+        this.pos = this.pos.add(this.vel);
+        this.vel = this.vel.mul(pos3(0.99)); // friction
+        this.rot = this.rot.add(this.rotVel);
+        this.rotVel = this.rotVel.mul(pos3(0.99)); // friction
+        this.draw(g, cam);
     }
 }

@@ -49,19 +49,14 @@ export class Graphics {
         return [
             // Front face (clockwise order)
             [topLeftFront, topRightFront, bottomRightFront, bottomLeftFront],
-    
             // Back face (clockwise order)
             [topLeftBack, bottomLeftBack, bottomRightBack, topRightBack],
-    
             // Left face (clockwise order)
             [topLeftBack, topLeftFront, bottomLeftFront, bottomLeftBack],
-    
             // Right face (clockwise order)
             [topRightBack, bottomRightBack, bottomRightFront, topRightFront],
-    
             // Top face (clockwise order)
             [topLeftBack, topRightBack, topRightFront, topLeftFront],
-    
             // Bottom face (clockwise order)
             [bottomLeftBack, bottomLeftFront, bottomRightFront, bottomRightBack],
         ];
@@ -301,10 +296,8 @@ export class Graphics {
         this.cm.ctx.lineWidth = lineWide;
         if(!fill) this.cm.ctx.strokeStyle = outline.toString();
         if(fill) this.cm.ctx.fillStyle = outline.toString();
-        points.forEach(p => {
-            p = this.cm.translate2(p);
-            this.cm.ctx.lineTo(p.x, p.y);
-        })
+        const translatedPoints = points.map(p => this.cm.translate2(p));
+        translatedPoints.forEach(p => this.cm.ctx.lineTo(p.x, p.y));
         var first = this.cm.translate2(points[0]);
         this.cm.ctx.lineTo(first.x, first.y); // go back to the first point to connect all points
         // otherwise it would be open and not be a polygon

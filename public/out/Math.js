@@ -17,47 +17,56 @@ export class MathLib {
         return new Vec2(x, y);
     }
     static projectPoint3(point, camera) {
-        // First translate point to camera space
-        let viewSpace = point.sub(camera.getPos());
-        // Early return if point is behind camera
-        if (viewSpace.z <= 0) {
+        // Transform point to camera space
+        let viewSpace = this.transformToViewSpace(point, camera);
+        // Early Z clipping check
+        if (viewSpace.z > -camera.near || viewSpace.z < -camera.far) {
             return new Vec2(Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER);
         }
-        // Apply perspective projection
+        // Perspective projection
         const fovRad = MathLib.degreesToRadians(camera.fov);
         const scale = 1.0 / Math.tan(fovRad / 2);
-        // Project the point
-        const projectedX = (viewSpace.x * scale) / viewSpace.z;
-        const projectedY = (viewSpace.y * scale) / viewSpace.z;
-        // Convert to screen space
-        const screenX = projectedX * (camera.aspect * 300); // Increased scale factor
-        const screenY = projectedY * 300; // Increased scale factor
-        return new Vec2(screenX, screenY);
+        // Project to normalized device coordinates (NDC)
+        // Note: No need to add screenCenter since we want (0,0) at center
+        const x = (viewSpace.x * scale) / -viewSpace.z;
+        const y = (viewSpace.y * scale) / -viewSpace.z;
+        // Scale to screen space while maintaining center origin
+        const screenScale = Math.min(window.innerWidth, window.innerHeight) / 2;
+        return new Vec2(x * screenScale * camera.aspect, y * screenScale);
     }
-    static rotate3dX(point, angle) {
-        angle = this.degreesToRadians(angle);
-        const c = Math.cos(angle);
-        const s = Math.sin(angle);
-        return new Vec3(point.x, point.y * c - point.z * s, point.y * s + point.z * c);
-    }
-    static rotate3dY(point, angle) {
-        angle = this.degreesToRadians(angle);
-        const c = Math.cos(angle);
-        const s = Math.sin(angle);
-        return new Vec3(point.x * c + point.z * s, point.y, -point.x * s + point.z * c);
-    }
-    static rotate3dZ(point, angle) {
-        angle = this.degreesToRadians(angle);
-        const c = Math.cos(angle);
-        const s = Math.sin(angle);
-        return new Vec3(point.x * c - point.y * s, point.x * s + point.y * c, point.z);
+    static transformToViewSpace(point, camera) {
+        let transformed = point.sub(camera.getPos());
+        transformed = MathLib.rotate3dY(transformed, -camera.getRot().y);
+        transformed = MathLib.rotate3dX(transformed, -camera.getRot().x);
+        transformed = MathLib.rotate3dZ(transformed, -camera.getRot().z);
+        return transformed;
     }
     static rotate3d(point, rotation) {
-        // Apply rotations in order: Y (yaw), X (pitch), Z (roll)
+        // Apply rotations in order: Y, X, Z (yaw, pitch, roll)
         let rotated = point;
         rotated = this.rotate3dY(rotated, rotation.y);
         rotated = this.rotate3dX(rotated, rotation.x);
         rotated = this.rotate3dZ(rotated, rotation.z);
         return rotated;
+    }
+    static rotate3dX(point, angle) {
+        const rad = this.degreesToRadians(angle);
+        const cos = Math.cos(rad);
+        const sin = Math.sin(rad);
+        return new Vec3(point.x, point.y * cos - point.z * sin, point.y * sin + point.z * cos);
+    }
+    static rotate3dY(point, angle) {
+        const rad = this.degreesToRadians(angle);
+        const cos = Math.cos(rad);
+        const sin = Math.sin(rad);
+        return new Vec3(point.x * cos - point.z * sin, // Changed matrix multiplication order
+        point.y, point.x * sin + point.z * cos // Changed matrix multiplication order
+        );
+    }
+    static rotate3dZ(point, angle) {
+        const rad = this.degreesToRadians(angle);
+        const cos = Math.cos(rad);
+        const sin = Math.sin(rad);
+        return new Vec3(point.x * cos - point.y * sin, point.x * sin + point.y * cos, point.z);
     }
 }

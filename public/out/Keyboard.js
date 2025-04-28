@@ -12,7 +12,6 @@ export class KeyboardManager {
     }
     keyPress(e) {
         // on key press
-        console.log("Key pressed:", this.keys);
         if (this.keys[e.key]) {
             const key = this.keys[e.key];
             if (key.onPress)
