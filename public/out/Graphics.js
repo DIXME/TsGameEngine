@@ -122,8 +122,13 @@ export class Graphics {
          */
         return verts.map(v => new Vec3(v.x, v.y, z));
     }
-    rotateFaces(faces, rotation) {
-        return faces.map(face => face.map(point => MathLib.rotate3d(point, rotation)));
+    rotateFaces(faces, rotation, center) {
+        // translate
+        faces = faces.map(face => face.map(point => MathLib.translatePoint(point, new Vec3(-center.x, -center.y, -center.z))));
+        faces = faces.map(face => face.map(point => MathLib.rotate3d(point, rotation))); // rotate
+        faces = faces.map(face => face.map(point => MathLib.translatePoint(point, center)));
+        // untrasnalte & return new faces
+        return faces;
     }
     drawFaces(faces, cam, color, fill, borderSize) {
         /**
@@ -161,7 +166,7 @@ export class Graphics {
     pyrimid(pos, bhdv, rot, cam, color, borderSize, fill) {
         var faces = this.pyrimidVerts(pos, bhdv);
         if (rot)
-            faces = this.rotateFaces(faces, rot);
+            faces = this.rotateFaces(faces, rot, pos);
         this.drawFaces(faces, cam, color, fill, borderSize);
     }
     // this export class will handle all of graphics
@@ -217,7 +222,7 @@ export class Graphics {
         var projectedPoints = [];
         if (rot) {
             // apply roation
-            faces = this.rotateFaces([verts3d], rot);
+            faces = this.rotateFaces([verts3d], rot, pos);
         }
         // array of faces
         this.drawFaces(faces, cam, color, fill, borderSize);
@@ -245,7 +250,7 @@ export class Graphics {
         var verts = this.rectprismVerts(pos, whdv);
         if (rot) {
             // apply roation
-            verts = this.rotateFaces(verts, rot);
+            verts = this.rotateFaces(verts, rot, pos);
         }
         // array of faces
         if (!image)

@@ -113,8 +113,8 @@ const player = new CameraController(cam, keyboard);
 
 const boxes = []
 
-for (let y = 0; y < 5; y++) {
-    for (let x = 0; x < 5; x++) {
+for (let y = 0; y < 3; y++) {
+    for (let x = 0; x < 3; x++) {
         boxes.push(new rectprism(
         new Vec3(-100 + (45 * (x + 1)), y * 45, 0),
         new Vec3(25),
@@ -127,7 +127,7 @@ for (let y = 0; y < 5; y++) {
 scene.addObject(keyboard);
 scene.callBack = () => {
     boxes.forEach((b, i) => {
-        b.pushRot(new Vec3(0.01))
+        b.pushRot(new Vec3(Math.random()/100))
     })
 }
 

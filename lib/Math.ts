@@ -58,7 +58,7 @@ export class MathLib {
         [point.z],
         [1]
       ]
-      var distanceVector: Vec3 = new Vec3(point.x,point.y,point.z)
+      var distanceVector: Vec3 = new Vec3(-point.x,-point.y,-point.z)
       var translationMartix: martix = this.translationMartix(distanceVector)
       var newMartix: martix = this.matrixMultiply(translationMartix,pointMatrix)
       return new Vec3(newMartix[0][0],newMartix[1][0],newMartix[2][0])

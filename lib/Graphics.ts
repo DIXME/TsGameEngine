@@ -142,10 +142,15 @@ export class Graphics {
       return verts.map(v => new Vec3(v.x, v.y, z)) as verts3d;
     }
   
-    private rotateFaces(faces: faces3d, rotation: Vec3): faces3d {
-      return faces.map(face =>
-        face.map(point => MathLib.rotate3d(point, rotation))
-      );
+    private rotateFaces(faces: faces3d, rotation: Vec3, center: Vec3): faces3d {
+        // translate
+        faces = faces.map(face => face.map(point => MathLib.translatePoint(point, new Vec3(-center.x,-center.y,-center.z))))
+        faces = faces.map(face =>
+            face.map(point => MathLib.rotate3d(point, rotation))
+        ) // rotate
+        faces = faces.map(face => face.map(point => MathLib.translatePoint(point,center)))
+        // untrasnalte & return new faces
+        return faces
     }
   
     drawFaces(faces: faces3d, cam: Camera, color: Color, fill?: boolean, borderSize?: number): void {
@@ -181,7 +186,7 @@ export class Graphics {
   
     pyrimid(pos: Vec3, bhdv: Vec3, rot: Vec3, cam: Camera, color: Color, borderSize: number, fill?: boolean) {
       var faces: faces3d = this.pyrimidVerts(pos, bhdv)
-      if (rot) faces = this.rotateFaces(faces, rot)
+      if (rot) faces = this.rotateFaces(faces, rot,pos)
       this.drawFaces(faces, cam, color, fill, borderSize)
     }
   
@@ -243,7 +248,7 @@ export class Graphics {
   
       if (rot) {
         // apply roation
-        faces = this.rotateFaces([verts3d], rot);
+        faces = this.rotateFaces([verts3d], rot,pos);
       }
   
       // array of faces
@@ -273,7 +278,7 @@ export class Graphics {
   
       if (rot) {
         // apply roation
-        verts = this.rotateFaces(verts, rot);
+        verts = this.rotateFaces(verts, rot,pos);
       }
   
       // array of faces
