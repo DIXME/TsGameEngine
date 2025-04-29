@@ -1,8 +1,8 @@
 import { GameObject2d, GameObject3d } from "./GameObject.js";
 export class Scene {
     constructor(objects2d, objects3d, camera, graphics) {
-        // this class will manage other objects every frame by calling a tick method
-        // this class will hold 3d objects and 2d objects
+        // this export class will manage other objects every frame by calling a tick method
+        // this export class will hold 3d objects and 2d objects
         // it will hold gameobjects!
         // game objects will include anything that will tick
         // every frame, the keyboard manager is not a game object
@@ -13,6 +13,7 @@ export class Scene {
         this.objects3d = objects3d;
         this.camera = camera;
         this.graphics = graphics;
+        this.callBack = () => { };
         // Bind the loop method to the correct context
         this.loop = this.loop.bind(this);
     }
@@ -46,6 +47,10 @@ export class Scene {
         this.objects2d.forEach(object => object.tick(this.graphics));
         this.objects3d.forEach(object => object.tick(this.graphics, this.camera));
         this.camera.tick();
+        // if the user spesfied a callback we will run there code
+        // each frame
+        if (this.callBack)
+            this.callBack();
         requestAnimationFrame(this.loop);
     }
 }

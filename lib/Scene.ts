@@ -1,58 +1,63 @@
-import { GameObject, GameObject2d, GameObject3d } from "./GameObject.js";
-import { Camera } from "./Camera.js";
+import { GameObject2d, GameObject3d, GameObject } from "./GameObject.js";
 import { Graphics } from "./Graphics.js";
+import { Camera } from "./Camera.js";
 
 export class Scene {
-    // this class will manage other objects every frame by calling a tick method
-    // this class will hold 3d objects and 2d objects
+    // this export class will manage other objects every frame by calling a tick method
+    // this export class will hold 3d objects and 2d objects
     // it will hold gameobjects!
     // game objects will include anything that will tick
     // every frame, the keyboard manager is not a game object
     // it functions off of events, not a tick method
-
+  
     private objects2d: GameObject2d[] = [];
     private objects3d: GameObject3d[] = [];
     private camera: Camera;
     public graphics: Graphics;
-
+    public callBack: Function; // the user can run thier own code every frame
+  
     constructor(objects2d: GameObject2d[], objects3d: GameObject3d[], camera: Camera, graphics: Graphics) {
-        this.objects2d = objects2d;
-        this.objects3d = objects3d;
-        this.camera = camera;
-        this.graphics = graphics;
-
-        // Bind the loop method to the correct context
-        this.loop = this.loop.bind(this);
+      this.objects2d = objects2d;
+      this.objects3d = objects3d;
+      this.camera = camera;
+      this.graphics = graphics;
+      this.callBack = () => { };
+  
+      // Bind the loop method to the correct context
+      this.loop = this.loop.bind(this);
     }
-
+  
     addObject(object: GameObject): void {
-        // add an object to the scene
-        if (object instanceof GameObject2d) {
-            this.objects2d.push(object);
-        } else if (object instanceof GameObject3d) {
-            this.objects3d.push(object);
-        } else {
-            throw new Error("Object is not a GameObject2d or GameObject3d");
-        }
+      // add an object to the scene
+      if (object instanceof GameObject2d) {
+        this.objects2d.push(object);
+      } else if (object instanceof GameObject3d) {
+        this.objects3d.push(object);
+      } else {
+        throw new Error("Object is not a GameObject2d or GameObject3d");
+      }
     }
-
+  
     removeObject(object: GameObject): void {
-        // remove an object from the scene
-        if (object instanceof GameObject2d) {
-            this.objects2d = this.objects2d.filter(obj => obj !== object);
-        } else if (object instanceof GameObject3d) {
-            this.objects3d = this.objects3d.filter(obj => obj !== object);
-        } else {
-            throw new Error("Object is not a GameObject2d or GameObject3d");
-        }
+      // remove an object from the scene
+      if (object instanceof GameObject2d) {
+        this.objects2d = this.objects2d.filter(obj => obj !== object);
+      } else if (object instanceof GameObject3d) {
+        this.objects3d = this.objects3d.filter(obj => obj !== object);
+      } else {
+        throw new Error("Object is not a GameObject2d or GameObject3d");
+      }
     }
-
+  
     loop(): void {
-        // call the tick method on all objects
-        this.graphics.drawBackground();
-        this.objects2d.forEach(object => object.tick(this.graphics));
-        this.objects3d.forEach(object => object.tick(this.graphics, this.camera));
-        this.camera.tick();
-        requestAnimationFrame(this.loop);
+      // call the tick method on all objects
+      this.graphics.drawBackground();
+      this.objects2d.forEach(object => object.tick(this.graphics));
+      this.objects3d.forEach(object => object.tick(this.graphics, this.camera));
+      this.camera.tick();
+      // if the user spesfied a callback we will run there code
+      // each frame
+      if (this.callBack) this.callBack()
+      requestAnimationFrame(this.loop);
     }
-}
+  }

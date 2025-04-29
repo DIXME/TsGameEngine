@@ -1,10 +1,11 @@
-import { Vec2, Vec3 } from "./Vectors.js";
-import { MathLib } from "./Math.js";
 /**
- * i want to fix my functions so theres just one
- * function for each
- * shape that has alot of settings that are optinal
- */
+   * i want to fix my functions so theres just one
+   * function for each
+   * shape that has alot of settings that are optinal
+*/
+import { Color } from "./Colors.js";
+import { MathLib } from "./Math.js";
+import { Vec2, Vec3 } from "./Vectors.js";
 export class Graphics {
     // methods that do not specify 3d in there name will be 2d and not be corroloated witht a 3d scene
     /**
@@ -45,6 +46,20 @@ export class Graphics {
             [topLeftBack, topRightBack, topRightFront, topLeftFront],
             // Bottom face (clockwise order)
             [bottomLeftBack, bottomLeftFront, bottomRightFront, bottomRightBack],
+        ];
+    }
+    pyrimidVerts(pos, bhdv) {
+        const top = new Vec3(pos.x, pos.y + bhdv.y, pos.z - bhdv.z / 2);
+        const bottomLeftFront = new Vec3(pos.x - (bhdv.x / 2), pos.y - (bhdv.y / 2), pos.z + (bhdv.z / 2));
+        const bottomRightFront = new Vec3(pos.x + (bhdv.x / 2), pos.y - (bhdv.y / 2), pos.z + (bhdv.z / 2));
+        const bottomLeftBack = new Vec3(pos.x - (bhdv.x / 2), pos.y - (bhdv.y / 2), pos.z - (bhdv.z / 2));
+        const bottomRightBack = new Vec3(pos.x + (bhdv.x / 2), pos.y - (bhdv.y / 2), pos.z - (bhdv.z / 2));
+        return [
+            [top, bottomLeftFront, bottomRightFront], // front tri
+            [top, bottomLeftBack, bottomRightBack], // back tri
+            [top, bottomLeftBack, bottomLeftFront], // left tri
+            [top, bottomRightBack, bottomRightFront], // right tri
+            [bottomLeftBack, bottomRightBack, bottomRightFront, bottomLeftFront]
         ];
     }
     rectVerts(pos, whv) {
@@ -128,6 +143,27 @@ export class Graphics {
                 this.connectPoints2(projectedFace, color, 1, true);
         });
     }
+    drawFacesTextrue(faces, cam, image, borderSize) {
+        /**
+         * @param faces array of faces (array of points)
+         * @param cam camera object (Camera instance)
+         * @param color color string (stroke style)
+         * @param fill fill the shape or not (default is false)
+         * @param borderSize line width (default is 1)
+         */
+        if (!borderSize)
+            borderSize = 1;
+        faces.forEach(face => {
+            const projectedFace = face.map(p => MathLib.projectPoint3(p, cam));
+            this.connectPoints2(projectedFace, new Color(0, 0, 0), 1, false, image);
+        });
+    }
+    pyrimid(pos, bhdv, rot, cam, color, borderSize, fill) {
+        var faces = this.pyrimidVerts(pos, bhdv);
+        if (rot)
+            faces = this.rotateFaces(faces, rot);
+        this.drawFaces(faces, cam, color, fill, borderSize);
+    }
     // this export class will handle all of graphics
     constructor(bgColor, cm) {
         /**
@@ -200,20 +236,22 @@ export class Graphics {
             this.cm.ctx.fillRect(pos.x - whv.x / 2, pos.y - whv.y / 2, whv.x, whv.y);
         }
     }
-    rectprism(pos, whdv, cam, color, fill, borderSize, rot) {
+    rectprism(pos, whdv, cam, color, fill, borderSize, rot, image) {
         /**
          * @arg pos centered & translated cords (this is a position)
          * @arg whdv width, height & depth vector
          * @arg color color string (stroke style)
          */
         var verts = this.rectprismVerts(pos, whdv);
-        var projectedPoints = [];
         if (rot) {
             // apply roation
             verts = this.rotateFaces(verts, rot);
         }
         // array of faces
-        this.drawFaces(verts, cam, color, fill, borderSize);
+        if (!image)
+            this.drawFaces(verts, cam, color, fill, borderSize);
+        if (image)
+            this.drawFacesTextrue(verts, cam, image);
     }
     // -------Rects------- (end)
     // #########################
@@ -244,7 +282,7 @@ export class Graphics {
     // -------Circles------- (end)
     // ⚠️ Impoarnt Preformce Issues Most Likely Caused By This
     // (every 3d model is just triangles and therer made with this function) ⚠️
-    connectPoints2(points, outline, lineWide, fill) {
+    connectPoints2(points, outline, lineWide, fill, img) {
         /**
          * @param origin
          * @param points
@@ -259,16 +297,27 @@ export class Graphics {
             this.cm.ctx.strokeStyle = outline.toString();
         if (fill)
             this.cm.ctx.fillStyle = outline.toString();
+        if (img) {
+            const pattern = this.cm.ctx.createPattern(img, "repeat"); // or "no-repeat", "repeat-x", "repeat-y" 
+            this.cm.ctx.fillStyle = pattern;
+        }
         const translatedPoints = points.map(p => this.cm.translate2(p));
-        translatedPoints.forEach(p => this.cm.ctx.lineTo(p.x, p.y));
+        translatedPoints.forEach(p => {
+            this.cm.ctx.lineTo(p.x, p.y);
+            //this.cm.ctx.fillStyle = 'green'
+            //this.cm.ctx.fillRect(p.x-2.5,p.y-2.5,5,5) //debug
+        });
         var first = this.cm.translate2(points[0]);
         this.cm.ctx.lineTo(first.x, first.y); // go back to the first point to connect all points
         // otherwise it would be open and not be a polygon
-        if (!fill)
+        if (!fill && !img)
             this.cm.ctx.stroke();
-        if (fill)
+        if (fill && !img)
             this.cm.ctx.fill();
         this.cm.ctx.closePath();
+        if (img) {
+            this.cm.ctx.fill();
+        }
     }
     // -------Triangles------- (start)
     tri(pos, bhv, outline, borderSize, fill, rot) {

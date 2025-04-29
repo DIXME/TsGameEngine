@@ -1,3 +1,13 @@
+import { Color, colorsClass } from "./out/Colors.js";
+import { CanvasManager } from "./out/CanvasManager.js";
+import { Graphics } from "./out/Graphics.js";
+import { Vec2, Vec3 } from "./out/Vectors.js";
+import { Camera } from "./out/Camera.js";
+import { rectprism, rect2d, pyrimid } from "./out/GameObject.js";
+import { Scene } from "./out/Scene.js";
+import { KeyboardManager } from "./out/Keyboard.js";
+import { CameraController } from "./out/CameraController.js";
+
 /**
  *  e↸ζ∃🡧
  * - i litterlay cant spell i dont know why or how i am able
@@ -40,16 +50,6 @@
 
 // game scenes and loops will be handled by classes but we want to finsh all rending stuff first
 
-import { CanvasManager } from "./out/CanvasManager.js";
-import { Graphics } from "./out/Graphics.js";
-import { Color, colorsClass } from "./out/Colors.js";
-import { Camera } from "./out/Camera.js";
-import { rectprism, rect3d, rect2d } from "./out/GameObject.js"
-import { Scene } from "./out/Scene.js";
-import { KeyboardManager } from "./out/Keyboard.js";
-import { CameraController } from "./out/CameraController.js";
-import { Vec2, Vec3 } from "./out/Vectors.js";
-
 const coolColor1 = new Color(200, 100, 210);
 const coolColor2 = new Color(32, 60, 13);
 
@@ -67,24 +67,11 @@ g.drawBackground();
 const cam = new Camera(
     new Vec3(0, 0, 500),  // Camera position
     new Vec3(0, 0, 0),     // Camera rotation
-    50,                // FOV
+    60,                // FOV
     window.innerWidth / window.innerHeight, // Proper aspect ratio
-    0.1,               // Near plane
-    1000               // Far plane
+    0.001,               // Near plane
+    10000               // Far plane
 );
-
-const box = new rectprism(
-    new Vec3(0),     // Position
-    new Vec3(25), // Size (width, height, depth)
-    colors.red
-)
-
-const box2 = new rect3d(
-    new Vec3(-10),     // Position
-    new Vec3(25), // Size (width, height, depth)
-    new Vec3(35),
-    colors.red     // Opacity
-)
 
 const xAxis = new rectprism(
     new Vec3(50, 0, 0),    // Position: half the length on positive X
@@ -111,12 +98,47 @@ const box2s = new rect2d(
     colors.red
 )
 
-const scene = new Scene([],[], cam, g);
+const pyrimid1 = new pyrimid(new Vec3(0), new Vec3(50), new Vec3(35), coolColor1)
+
+const box = new rectprism(
+    new Vec3(0),     // Position
+    new Vec3(25), // Size (width, height, depth)
+    coolColor2
+)
+
+const scene = new Scene([], [], cam, g);
 const keyboard = new KeyboardManager();
-// fix 2d scene objects not working latter
+//fix 2d scene objects not working latter
 const player = new CameraController(cam, keyboard);
-scene.addObject(xAxis);
-scene.addObject(yAxis);
-scene.addObject(zAxis);
-scene.addObject(box);
+
+const boxes = []
+
+for (let y = 0; y < 5; y++) {
+    for (let x = 0; x < 5; x++) {
+        boxes.push(new rectprism(
+        new Vec3(-100 + (45 * (x + 1)), y * 45, 0),
+        new Vec3(25),
+        coolColor1
+        ))
+        scene.addObject(boxes[boxes.length - 1])
+    }
+}
+
+scene.addObject(keyboard);
+scene.callBack = () => {
+    boxes.forEach((b, i) => {
+        b.pushRot(new Vec3(0.01))
+    })
+}
+
 scene.loop()
+
+/*
+- problem description (vertices broken)
+the prymids vertices are for some reason being distored
+the pyrimid being in the scene also distrorts other objects like a cube
+porolly somthing involing the rotation martix i doubt its the projection martix
+i think its beacuse i tried to use chatgpt to fix my porblems but
+suppirse supprise it diddnt work
+so im going to rewrite the entire math libbary to use martixices
+*/

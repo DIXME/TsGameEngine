@@ -38,25 +38,25 @@ export class CanvasManager {
         // applies no padding to the document so the canvas fits perfectly
         const style = document.createElement("style");
         style.innerText = `
-        * {
-        margin: 0px;
-        position: fixed;
-        }
-
-        #ui {
-        width: 100vw;
-        height: 100vh;
-        position: fixed;
-        border: 1px solid black;
-        border-radius: 10px
-
-        }
-
-        #ui * {
-        position: initial;
-        text-align: center;
-        }
-        `;
+          * {
+          margin: 0px;
+          position: fixed;
+          }
+  
+          #ui {
+          width: 100vw;
+          height: 100vh;
+          position: fixed;
+          border: 1px solid black;
+          border-radius: 10px
+  
+          }
+  
+          #ui * {
+          position: initial;
+          text-align: center;
+          }
+          `;
         // the ui is here beacuse the css above will overdide it
         document.body.appendChild(style);
     }

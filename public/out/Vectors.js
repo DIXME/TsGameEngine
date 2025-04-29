@@ -50,14 +50,3 @@ export class Vec3 {
         return new Vec3(other.x / this.x, this.y / other.y, this.z / other.z);
     }
 }
-export class Entity {
-    constructor(position) {
-        this.position = position;
-    }
-    push(velocity) {
-        console.log("Before push:", this.position);
-        console.log("Velocity:", velocity);
-        this.position = this.position.add(velocity);
-        console.log("After push:", this.position);
-    }
-}
