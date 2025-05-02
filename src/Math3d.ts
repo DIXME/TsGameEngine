@@ -67,10 +67,10 @@ export class Math3d {
     }
 
     static projectionMatrix(pos: point3, cam: Camera): matrix {
-        var tf: number = Math.tan(cam.fov/2);
-        var nfs: number = cam.near + cam.far;
-        var nfd: number = cam.near - cam.far;
-        var nfp: number = cam.near * cam.far;
+        let tf: number = Math.tan(cam.fov/2);
+        let nfs: number = cam.near + cam.far;
+        let nfd: number = cam.near - cam.far;
+        let nfp: number = cam.near * cam.far;
         return [
             [1/(tf*cam.aspect_ratio), 0, 0, 0],
             [0, 1/tf, 0, 0],
@@ -79,23 +79,21 @@ export class Math3d {
         ]
     }
 
+    static  rotateVector3(point: Vec3, r: Vec3, cam: Camera): Vec3 {
+        let unpackedPointMatrix: matrix;
+        unpackedPointMatrix = this.multiplyMatrices( rotationMatrices.z, point.mt3() );
+        point = Vec3.fromMt(unpackedPointMatrix);
+        unpackedPointMatrix = this.multiplyMatrices( rotationMatrices.y, point.mt3() );
+        point = Vec3.fromMt(unpackedPointMatrix);
+        unpackedPointMatrix = this.multiplyMatrices( rotationMatrices.x, point.mt3() );
+        return Vec3.fromMt(unpackedPointMatrix);
+    }
+
     static rotatePoint3(point: point3, r: point3, cam: Camera): point3 {
-        let unpackedPointMatrix: matrix
-        let rotationMatrices: Record<string, matrix> = this.rotationMatrices3(point, r)
-        let original: point3 = point
-        unpackedPointMatrix = this.multiplyMatrices( this.translationMatrix3(point,point.opp()), point.mt4() );
-        point = Vec3.fromMt(unpackedPointMatrix)
-
-        unpackedPointMatrix = this.multiplyMatrices( rotationMatrices.z, point.mt3() )
-        point = Vec3.fromMt(unpackedPointMatrix)
-        unpackedPointMatrix = this.multiplyMatrices( rotationMatrices.y, point.mt3() )
-        point = Vec3.fromMt(unpackedPointMatrix)
-        unpackedPointMatrix = this.multiplyMatrices( rotationMatrices.x, point.mt3() )
-        point = Vec3.fromMt(unpackedPointMatrix)
-
-        unpackedPointMatrix = this.multiplyMatrices( this.translationMatrix3(point, original), point.mt4());
-        point = Vec3.fromMt(unpackedPointMatrix)
-
-        return point
+        let original: point3 = point;
+        point = Vec3.fromMt( this.multiplyMatrices( this.translationMatrix3( point,point.opp() ), point.mt4() ) );
+        point = this.rotateVector3(point, r, cam);
+        point = Vec3.fromMt( this.multiplyMatrices( this.translationMatrix3( point, original ), point.mt4() ) );
+        return point;
     }
 }
